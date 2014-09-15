@@ -1,0 +1,48 @@
+http://weblogs.asp.net/scottgu/asp-net-mvc-2-model-validation
+Change?
+
+В createts.aspx
+
+<script src="/Scripts/MicrosoftAjax.js" type="text/javascript"></script>
+<script src="/Scripts/MicrosoftMvcValidation.js" type="text/javascript"></script>
+<% Html.EnableClientValidation(); %>
+
+<% using (Html.BeginForm()) {%
+...
+
+
+using System.ComponentModel.DataAnnotations;
+
+                public class NumberAttribute : RegularExpressionAttribute
+{
+    public NumberAttribute() 
+        : base("^(A|B|C|E|H|K|M|O|P|T|X|Y)+[0-9]{3,3}(A|B|C|E|H|K|M|O|P|T|X|Y){2,2}[0-9]{2,3}$")
+    {
+    }
+}
+
+
+
+
+
+
+
+
+в .edmx.designer над стандартным партиал ts классом написать [MetadataType(typeof(ts_Validation))], т.е. общий вид:
+
+[MetadataType(typeof(ts_Validation))]
+public partial class ts
+{
+}
+
+
+
+public class ts_Validation
+{
+ [Required(ErrorMessage = "Number Required")]
+ [Number(ErrorMessage = "Not a valid number")]
+ public string Number { get; set; }
+
+
+
+}
