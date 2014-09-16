@@ -10,6 +10,16 @@ CREATE TABLE USR
 	PRIMARY KEY(Login)
 );
 
+CREATE TABLE UnlimitedTariff
+(
+	Name char(255) not null default '',
+	Num_days int(11) null default 0,
+	Num_visits int(11) null default 0,
+	Price int(11) not null default 0,
+	PRIMARY KEY(Name)
+);
+
+
 #Главное не забыть пенести эту сущность, сделать ее после сущности "расположение на парковке", иначе errno 150
 #Status may be: 1)Expired 2)Visited 3)In waiting visit 4)Revoke
 CREATE TABLE Reservation
@@ -72,7 +82,7 @@ CREATE TABLE LevelsZone
 	TypeLevel char(255) not null default '',
 	#Places int(11) not null default 1,
 	FOREIGN KEY(Parking_zone) REFERENCES ParkingZones(Parking_zone),
-	PRIMARY KEY(id_info_about_level)
+	PRIMARY KEY(id_location_level)
 );
 
 #Location = position
@@ -85,6 +95,8 @@ CREATE TABLE Places
 	#then will be bool:
 	SupportClimateControl char(3) not null default '',
 	ProtectionFromTheWeather char(3) not null default '',
+#
+#	PriceWithUnlimitedTariff int(11) not null default 0,
 	FOREIGN KEY(id_location_level) REFERENCES LevelsZone(id_location_level),
 	PRIMARY KEY(id_location_place)
 );
@@ -107,41 +119,21 @@ CREATE TABLE Visit
 
 
 
-
-
 delimiter //
 create function func1(zon integer(11), lev integer(11)) returns integer
 begin
-set zon := (select id_record_with_z_and_l from LevelsZone where Parking_zone = zon and Level = lev);
+set zon := (select id_location_level from LevelsZones where Parking_zone = zon and Level = lev);
 return zon;
 end//
 delimiter ;
 
-delimiter //
-create function func25(Plac integer(11), id_z integer(11)) returns integer
-begin
-IF ((select count(*) from Places where id_record_with_z_and_l = id_z and Place = Plac ) > 0) THEN
-return (select id_Place_p_Level_l_Zone_z from Places where id_record_with_z_and_l = id_z and Place = Plac);
-ELSEIF ((select count(*) from Places where id_record_with_z_and_l = id_z and Place = Plac) = 0) THEN
-return 0;
-END IF;
-end//
-delimiter ;
-
 
 delimiter //
-create function func2(idplz integer(11)) returns integer
+create function func2(Plac integer(11), id_l integer(11)) returns integer
 begin
-IF ((select count(*) from Situated where id_Place_p_Level_l_Zone_z = idplz) > 0) THEN
-return (select id_situated from Situated where id_Place_p_Level_l_Zone_z = idplz);
-ELSEIF ((select count(*) from Situated where id_Place_p_Level_l_Zone_z = idplz) = 0) THEN
-return 0;
-END IF;
+return (select id_location_place from Places where Place = Plac and id_location_level = id_l);
 end//
 delimiter ;
-
-
-
 
 delimiter //
 create function func3() returns integer
@@ -155,16 +147,18 @@ delimiter ;
 delimiter //
 create function func4(k integer(11)) returns integer
 begin
-return (SELECT Levels FROM ParkingZones where Parking_zone = k);
+return (SELECT count(*) FROM LevelsZone where Parking_zone = k);
 end//
 delimiter ;
 
 delimiter //
 create function func5(k integer(11), j integer(11)) returns integer
 begin
-return (SELECT All_places_on_this_level FROM LevelsZone where Parking_zone = k and Level = j);
+return (SELECT count(*) FROM Places where id_location_level = (select LevelsZone.id_location_level from LevelsZone where Parking_zone = k and Level = j));
 end//
 delimiter ;
+
+
 
 delimiter //
 create function func6(Numb Char(11)) returns integer
@@ -180,32 +174,32 @@ delimiter //
 create function func9(clzon integer(11), cllev integer(11), clplace integer(11) ) returns integer
 begin
 
-IF EXISTS(select * from Location_On_Parking where Zone = clzon and Level = cllev and Place = clplace and Status == 'Free') THEN
+IF EXISTS(select * FROM Places where Place = clplace and Status = 'Free'and id_location_level = (select LevelsZone.id_location_level from LevelsZone where Parking_zone = clzon and Level = cllev)) THEN
 return 1;
-ELSEIF NOT EXISTS(select * from Location_On_Parking where Zone = clzon and Level = cllev and Place = clplace and Status == 'Free') THEN
+ELSEIF NOT EXISTS(select * FROM Places where Place = clplace and Status = 'Free'and id_location_level = (select LevelsZone.id_location_level from LevelsZone where Parking_zone = clzon and Level = cllev)) THEN
 return 0;
 END IF;
 
 end//
 delimiter ;
 
+
+
+
+
+
+
+
+
 insert into USR (Login, Balance, Num_visits) values ('v_sh95',0.00,0);
 
-INSERT INTO LevelsZone (Parking_zone,Level,All_places_on_this_level)
-values (1, 1,0),
-(1, 2,0),
-(2, 1,0),
-(3, 1,0);
+INSERT INTO LevelsZone (Parking_zone,Level,TypeLevel)
+values (1, 1,'Elevated part'),
+(1, 2,'Elevated part'),
+(2, 1,'Elevated part'),
+(3, 1,'Elevated part');
 
 
-INSERT INTO LevelsZone (Parking_zone,Level,All_places_on_this_level)
-values (1, 1,16),
-(1, 2,20),
-(2, 1,14),
-(3, 1,10);
 
-INSERT INTO Situated (id_Place_p_Level_l_Zone_z)
-values (1);
-
-INSERT INTO visit (Number,id_situated,DateIn)
+INSERT INTO visit (Number,id_location_place,DateIn)
 values ('T188HM33', 1,'10.09.14');
