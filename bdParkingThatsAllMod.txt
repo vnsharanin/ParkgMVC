@@ -10,27 +10,29 @@ CREATE TABLE USR
 	PRIMARY KEY(Login)
 );
 
+#Status: 1)Available 2)Not Available
 CREATE TABLE UnlimitedTariff
 (
 	Name char(255) not null default '',
 	Num_days int(11) null default 0,
 	Num_visits int(11) null default 0,
 	Price int(11) not null default 0,
+	Status char(25) not null default '',
 	PRIMARY KEY(Name)
 );
 
-
-#Главное не забыть пенести эту сущность, сделать ее после сущности "расположение на парковке", иначе errno 150
-#Status may be: 1)Expired 2)Visited 3)In waiting visit 4)Revoke
-CREATE TABLE Reservation
+CREATE TABLE UsingUnlimitedTariffs
 (
-	id_type int(11) unsigned not null auto_increment,
+	id int(11) unsigned not null auto_increment,
+	Name char(255) not null default '',
+	DateConnection char(255) not null default '00-00-00 00:00:00',
+	TheNumOfVisits int(11) null default 0,
+	Status char(20) not null default 0,
 	Login char(255) not null default '',
-	DateReservation char(255) not null default '00-00-00 00:00:00',
-	id_location int(11) null default 0,
-	StatusReservation char(255) not null default '',
+	DateUnconnectionOrRevoke char(255) not null default '00-00-00 00:00:00',
+	FOREIGN KEY(Name) REFERENCES UnlimitedTariff(Name),
 	FOREIGN KEY(Login) REFERENCES USR(Login),
-	PRIMARY KEY(Login)
+	PRIMARY KEY(id)
 );
 
 #Add type auto and then will check his. For trucks create new zone and new tarif.
@@ -100,6 +102,21 @@ CREATE TABLE Places
 	FOREIGN KEY(id_location_level) REFERENCES LevelsZone(id_location_level),
 	PRIMARY KEY(id_location_place)
 );
+
+
+#Главное не забыть пенести эту сущность, сделать ее после сущности "расположение на парковке", иначе errno 150
+#Status may be: 1)Expired 2)Visited 3)In waiting visit 4)Revoke
+CREATE TABLE Reservation
+(
+	id_type int(11) unsigned not null auto_increment,
+	Login char(255) not null default '',
+	DateReservation char(255) not null default '00-00-00 00:00:00',
+	id_location int(11) null default 0,
+	StatusReservation char(255) not null default '',
+	FOREIGN KEY(Login) REFERENCES USR(Login),
+	PRIMARY KEY(Login)
+);
+
 
 #FirstAttemptGoOut?
 CREATE TABLE Visit
