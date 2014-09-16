@@ -1,8 +1,0 @@
-        public ActionResult EL(string Parking_zone, string Levels, string Address, string Num)
-        {
-            ViewData["varName"] = Num;
-            return View();
-        }
-
-
-            <%= ViewData["varName"]%>

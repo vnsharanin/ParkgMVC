@@ -1,8 +1,0 @@
-delimiter //
-Create function f(inp varchar(25)) returns double
-begin
-declare Res double default 0;
-set Res = TIMESTAMPDIFF(minute, inp, now());
-return Res;
-end;//
-delimiter ;
