@@ -10,6 +10,20 @@ CREATE TABLE USR
 	PRIMARY KEY(Login)
 );
 
+#Главное не забыть пенести эту сущность, сделать ее после сущности "расположение на парковке", иначе errno 150
+#Status may be: 1)Expired 2)Visited 3)In waiting visit 4)Revoke
+CREATE TABLE Reservation
+(
+	id_type int(11) unsigned not null auto_increment,
+	Login char(255) not null default '',
+	DateReservation char(255) not null default '00-00-00 00:00:00',
+	id_location int(11) null default 0,
+	StatusReservation char(255) not null default '',
+	FOREIGN KEY(Login) REFERENCES USR(Login),
+	PRIMARY KEY(Login)
+);
+
+#Add type auto and then will check his. For trucks create new zone and new tarif.
 CREATE TABLE TS
 (
 	Number char(255) not null default '',
@@ -28,52 +42,72 @@ CREATE TABLE Type_Parking
 	PRIMARY KEY(id_type)
 );
 
-CREATE TABLE ParkingZones
-(
-	Parking_zone int(11) not null default 1,
-	id_type int(11) unsigned not null default 1,
-	Levels int(11) not null default 1,
-	Address char(50) not null default 1,
-	FOREIGN KEY(id_type) REFERENCES Type_Parking(id_type),
-	PRIMARY KEY(Parking_zone)
-);
-
-CREATE TABLE Location_On_Parking
-(
-	id_location int(11) unsigned not null auto_increment,
-	Parking_zone int(11) not null default 1,
-	Level int(11) not null default 1,
-	Place int(11) not null default 1,
-	Status char(255) not null default 'Free',
-	FOREIGN KEY(Parking_zone) REFERENCES ParkingZones(Parking_zone),
-	PRIMARY KEY(id_location)
-);
-
-
-CREATE TABLE Visit
-(
-	Num_vis int(11) unsigned not null auto_increment,
-	Number char(255) not null default '',	
-	id_situated int(11) unsigned not null default 1,
-	DateIn char(255) not null default '00-00-00 00:00:00',
-	DateOut char(255) null default 'dateout',
-	PRIMARY KEY(Num_vis),
-	FOREIGN KEY(Number) REFERENCES TS(Number),
-	FOREIGN KEY(id_situated) REFERENCES Situated(id_situated)
-);
-
-
-
-
 INSERT INTO Type_Parking (Name)
 values ('Ground'),
 ('Underground'),
 ('Ground-Underground');
 
-INSERT INTO ParkingZones (Parking_zone, id_type, Levels,Address)
-values (1, 1, 2,'Vladimir/Bolokonskaya'),
-(2, 2, 1, 'Vladimir/Bolokonskaya'),
-(3, 1, 1,'Vladimir/Bolokonskaya');
+CREATE TABLE ParkingZones
+(
+	Parking_zone int(11) not null default 1,
+	id_type int(11) unsigned not null default 1,
+	#Levels int(11) not null default 1,
+	Address char(50) not null default '',
+	FOREIGN KEY(id_type) REFERENCES Type_Parking(id_type),
+	PRIMARY KEY(Parking_zone)
+);
+
+INSERT INTO ParkingZones (Parking_zone, id_type,Address)
+values (1, 1,'Vladimir/Bolokonskaya'),
+(2, 2, 'Vladimir/Bolokonskaya'),
+(3, 1,'Vladimir/Bolokonskaya');
+
+
+#Type Level may be: 1)Underground part 2)Elevated part
+CREATE TABLE LevelsZone
+(
+	id_location_level int(11) unsigned not null auto_increment,
+	Parking_zone int(11) not null default 1,
+	Level int(11) not null default 1,
+	TypeLevel char(255) not null default '',
+	#Places int(11) not null default 1,
+	FOREIGN KEY(Parking_zone) REFERENCES ParkingZones(Parking_zone),
+	PRIMARY KEY(id_info_about_level)
+);
+
+#Location = position
+CREATE TABLE Places
+(
+	id_location_place int(11) unsigned not null auto_increment,
+	id_location_level int(11) unsigned not null default 1,
+	Place int(11) not null default 1,
+	Status char(255) not null default 'Free',
+	#then will be bool:
+	SupportClimateControl char(3) not null default '',
+	ProtectionFromTheWeather char(3) not null default '',
+	FOREIGN KEY(id_location_level) REFERENCES LevelsZone(id_location_level),
+	PRIMARY KEY(id_location_place)
+);
+
+#FirstAttemptGoOut?
+CREATE TABLE Visit
+(
+	Num_vis int(11) unsigned not null auto_increment,
+	Number char(255) not null default '',	
+	id_location_place int(11) unsigned not null default 1,
+	DateIn char(255) not null default '00-00-00 00:00:00',
+	DateOut char(255) null default 'dateout',
+	FirstAttemptGoOut char(255) null default 'dateout1',
+	PenultimateAttemptGoOut char(255) null default 'dateout2',
+	LastAttemptGoOut char(255) null default 'dateout3',
+	PRIMARY KEY(Num_vis),
+	FOREIGN KEY(Number) REFERENCES TS(Number),
+	FOREIGN KEY(id_location_place) REFERENCES Places(id_location_place)
+);
+
+
+
+
 
 delimiter //
 create function func1(zon integer(11), lev integer(11)) returns integer
