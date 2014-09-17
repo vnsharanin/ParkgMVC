@@ -1,13 +1,12 @@
-drop database Parkg;
-CREATE DATABASE Parkg;
-use Parkg;
+drop database ParkgMVC;
+CREATE DATABASE ParkgMVC;
+use ParkgMVC;
 
 CREATE TABLE USR
 (
 	Login char(255) not null default '',
 	Balance double null default 0.00,
 	NumOfVisitsWithoutUsingUnlimitedTariffs int(11) null default 0,
-	NumOfVisitsWithUsingUnlimitedTariffs int(11) null default 0,
 	PRIMARY KEY(Login)
 );
 
@@ -28,6 +27,7 @@ CREATE TABLE UsingUnlimitedTariffs
 	Name char(255) not null default 'Start',
 	DateConnection char(255) not null default '00-00-00 00:00:00',
 	Status char(20) not null default 0,
+	NumOfVisitsMadeWithUsingThisTariff int(11) null default 0,
 	Login char(255) not null default '',
 	DateUnconnectionOrRevoke char(255) not null default '00-00-00 00:00:00',
 	FOREIGN KEY(Name) REFERENCES UnlimitedTariff(Name),
@@ -109,10 +109,11 @@ CREATE TABLE Reservation
 	id_type int(11) unsigned not null auto_increment,
 	Login char(255) not null default '',
 	DateReservation char(255) not null default '00-00-00 00:00:00',
-	id_location int(11) null default 0,
+	id_location_place int(11) unsigned not null default 1,
 	StatusReservation char(255) not null default 'In waiting visit',
 	FOREIGN KEY(Login) REFERENCES USR(Login),
-	PRIMARY KEY(Login)
+	FOREIGN KEY(id_location_place) REFERENCES Places(id_location_place),
+	PRIMARY KEY(id_type)
 );
 
 
@@ -206,7 +207,7 @@ delimiter ;
 
 
 
-insert into USR (Login, Balance, Total_Num_visits) values ('v_sh95',0.00,0);
+insert into USR (Login, Balance, NumOfVisitsWithoutUsingUnlimitedTariffs) values ('v_sh95',0.00,0);
 
 INSERT INTO LevelsZone (Parking_zone,Level,TypeLevel)
 values (1, 1,'Elevated part'),
