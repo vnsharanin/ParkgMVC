@@ -1,0 +1,387 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="parkgModel.Store" Alias="Self" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.5" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+  <EntityContainer Name="parkgModelStoreContainer">
+    <EntitySet Name="balance" EntityType="parkgModel.Store.balance" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="levelszone" EntityType="parkgModel.Store.levelszone" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="parkingzones" EntityType="parkgModel.Store.parkingzones" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="places" EntityType="parkgModel.Store.places" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="reservation" EntityType="parkgModel.Store.reservation" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="reservation_tariff" EntityType="parkgModel.Store.reservation_tariff" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="tariffsonplaces" EntityType="parkgModel.Store.tariffsonplaces" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="ts" EntityType="parkgModel.Store.ts" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="type_parking" EntityType="parkgModel.Store.type_parking" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="unlimitedtariff" EntityType="parkgModel.Store.unlimitedtariff" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="usingunlimitedtariffs" EntityType="parkgModel.Store.usingunlimitedtariffs" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="usr" EntityType="parkgModel.Store.usr" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="visit" EntityType="parkgModel.Store.visit" store:Type="Tables" Schema="parkgmvc" />
+    <EntitySet Name="visitparameters" EntityType="parkgModel.Store.visitparameters" store:Type="Tables" Schema="parkgmvc" />
+    <AssociationSet Name="balance_ibfk_1" Association="parkgModel.Store.balance_ibfk_1">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="balance" EntitySet="balance" />
+    </AssociationSet>
+    <AssociationSet Name="levelszone_ibfk_1" Association="parkgModel.Store.levelszone_ibfk_1">
+      <End Role="parkingzones" EntitySet="parkingzones" />
+      <End Role="levelszone" EntitySet="levelszone" />
+    </AssociationSet>
+    <AssociationSet Name="parkingzones_ibfk_1" Association="parkgModel.Store.parkingzones_ibfk_1">
+      <End Role="type_parking" EntitySet="type_parking" />
+      <End Role="parkingzones" EntitySet="parkingzones" />
+    </AssociationSet>
+    <AssociationSet Name="places_ibfk_1" Association="parkgModel.Store.places_ibfk_1">
+      <End Role="levelszone" EntitySet="levelszone" />
+      <End Role="places" EntitySet="places" />
+    </AssociationSet>
+    <AssociationSet Name="places_ibfk_2" Association="parkgModel.Store.places_ibfk_2">
+      <End Role="tariffsonplaces" EntitySet="tariffsonplaces" />
+      <End Role="places" EntitySet="places" />
+    </AssociationSet>
+    <AssociationSet Name="reservation_ibfk_1" Association="parkgModel.Store.reservation_ibfk_1">
+      <End Role="reservation_tariff" EntitySet="reservation_tariff" />
+      <End Role="reservation" EntitySet="reservation" />
+    </AssociationSet>
+    <AssociationSet Name="reservation_ibfk_2" Association="parkgModel.Store.reservation_ibfk_2">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="reservation" EntitySet="reservation" />
+    </AssociationSet>
+    <AssociationSet Name="reservation_ibfk_3" Association="parkgModel.Store.reservation_ibfk_3">
+      <End Role="places" EntitySet="places" />
+      <End Role="reservation" EntitySet="reservation" />
+    </AssociationSet>
+    <AssociationSet Name="ts_ibfk_1" Association="parkgModel.Store.ts_ibfk_1">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="ts" EntitySet="ts" />
+    </AssociationSet>
+    <AssociationSet Name="usingunlimitedtariffs_ibfk_1" Association="parkgModel.Store.usingunlimitedtariffs_ibfk_1">
+      <End Role="unlimitedtariff" EntitySet="unlimitedtariff" />
+      <End Role="usingunlimitedtariffs" EntitySet="usingunlimitedtariffs" />
+    </AssociationSet>
+    <AssociationSet Name="usingunlimitedtariffs_ibfk_2" Association="parkgModel.Store.usingunlimitedtariffs_ibfk_2">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="usingunlimitedtariffs" EntitySet="usingunlimitedtariffs" />
+    </AssociationSet>
+    <AssociationSet Name="visit_ibfk_1" Association="parkgModel.Store.visit_ibfk_1">
+      <End Role="ts" EntitySet="ts" />
+      <End Role="visit" EntitySet="visit" />
+    </AssociationSet>
+    <AssociationSet Name="visit_ibfk_2" Association="parkgModel.Store.visit_ibfk_2">
+      <End Role="places" EntitySet="places" />
+      <End Role="visit" EntitySet="visit" />
+    </AssociationSet>
+    <AssociationSet Name="visit_ibfk_3" Association="parkgModel.Store.visit_ibfk_3">
+      <End Role="visitparameters" EntitySet="visitparameters" />
+      <End Role="visit" EntitySet="visit" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="balance">
+    <Key>
+      <PropertyRef Name="operation_id" />
+    </Key>
+    <Property Name="operation_id" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="Type_Operation" Type="char" Nullable="false" />
+    <Property Name="Sum" Type="double" />
+    <Property Name="Now_Balance" Type="double" />
+    <Property Name="Login" Type="char" Nullable="false" />
+    <Property Name="Description" Type="char" />
+  </EntityType>
+  <EntityType Name="levelszone">
+    <Key>
+      <PropertyRef Name="id_location_level" />
+    </Key>
+    <Property Name="id_location_level" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="Parking_zone" Type="int" Nullable="false" />
+    <Property Name="Level" Type="int" Nullable="false" />
+    <Property Name="TypeLevel" Type="char" Nullable="false" />
+  </EntityType>
+  <EntityType Name="parkingzones">
+    <Key>
+      <PropertyRef Name="Parking_zone" />
+    </Key>
+    <Property Name="Parking_zone" Type="int" Nullable="false" />
+    <Property Name="id_type" Type="uint" Nullable="false" />
+    <Property Name="Address" Type="char" Nullable="false" MaxLength="50" />
+  </EntityType>
+  <EntityType Name="places">
+    <Key>
+      <PropertyRef Name="id_location_place" />
+    </Key>
+    <Property Name="id_location_place" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="id_location_level" Type="uint" Nullable="false" />
+    <Property Name="Place" Type="int" Nullable="false" />
+    <Property Name="Status" Type="char" Nullable="false" />
+    <Property Name="id_tariff_on_place" Type="uint" Nullable="false" />
+  </EntityType>
+  <EntityType Name="reservation">
+    <Key>
+      <PropertyRef Name="id_reservation_user" />
+    </Key>
+    <Property Name="id_reservation_user" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="id_Reservation_Tariff" Type="uint" Nullable="false" />
+    <Property Name="Login" Type="char" Nullable="false" />
+    <Property Name="DateReservation" Type="char" Nullable="false" />
+    <Property Name="id_location_place" Type="uint" Nullable="false" />
+    <Property Name="StatusReservation" Type="char" Nullable="false" />
+  </EntityType>
+  <EntityType Name="reservation_tariff">
+    <Key>
+      <PropertyRef Name="id_Reservation_Tariff" />
+    </Key>
+    <Property Name="id_Reservation_Tariff" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="FirstFreeTimeInHours" Type="int" Nullable="false" />
+    <Property Name="PriceInRubForHourHightFreeTime" Type="int" Nullable="false" />
+    <Property Name="PriceInRubForHourHightFreeTimeWithUnlimitedTariff" Type="int" Nullable="false" />
+    <Property Name="Status" Type="char" Nullable="false" />
+    <Property Name="ValidityPeriodFromTheTimeOfActivationInHour" Type="int" Nullable="false" />
+    <Property Name="PriceForRevokeOrNotVisiting" Type="char" Nullable="false" />
+  </EntityType>
+  <EntityType Name="tariffsonplaces">
+    <Key>
+      <PropertyRef Name="id_tariff_on_place" />
+    </Key>
+    <Property Name="id_tariff_on_place" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="SupportClimateControl" Type="char" Nullable="false" MaxLength="3" />
+    <Property Name="Type" Type="char" Nullable="false" MaxLength="6" />
+    <Property Name="Status" Type="char" Nullable="false" />
+    <Property Name="PriceForHourWithoutUnlimitedTariff" Type="int" Nullable="false" />
+    <Property Name="PriceForHourWithUnlimitedTariff" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ts">
+    <Key>
+      <PropertyRef Name="id_ts" />
+    </Key>
+    <Property Name="id_ts" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="Number" Type="char" Nullable="false" />
+    <Property Name="Company" Type="char" Nullable="false" />
+    <Property Name="Mode" Type="char" Nullable="false" />
+    <Property Name="Login" Type="char" Nullable="false" />
+    <Property Name="Visible" Type="char" Nullable="false" />
+  </EntityType>
+  <EntityType Name="type_parking">
+    <Key>
+      <PropertyRef Name="id_type" />
+    </Key>
+    <Property Name="id_type" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="Name" Type="char" Nullable="false" MaxLength="30" />
+  </EntityType>
+  <EntityType Name="unlimitedtariff">
+    <Key>
+      <PropertyRef Name="Name" />
+    </Key>
+    <Property Name="Name" Type="char" Nullable="false" />
+    <Property Name="Num_days" Type="int" />
+    <Property Name="Max_Num_visits_in_this_tariff" Type="int" />
+    <Property Name="Price" Type="int" Nullable="false" />
+    <Property Name="Status" Type="char" Nullable="false" MaxLength="25" />
+  </EntityType>
+  <EntityType Name="usingunlimitedtariffs">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="Name" Type="char" Nullable="false" />
+    <Property Name="DateConnection" Type="char" Nullable="false" />
+    <Property Name="Status" Type="char" Nullable="false" MaxLength="20" />
+    <Property Name="NumOfVisitsMadeWithUsingThisTariff" Type="int" Nullable="false" />
+    <Property Name="Login" Type="char" Nullable="false" />
+    <Property Name="DateUnconnectionOrRevoke" Type="char" Nullable="false" />
+  </EntityType>
+  <EntityType Name="usr">
+    <Key>
+      <PropertyRef Name="Login" />
+    </Key>
+    <Property Name="Login" Type="char" Nullable="false" />
+    <Property Name="FIO" Type="char" />
+    <Property Name="Num_Card_Driver" Type="int" />
+  </EntityType>
+  <EntityType Name="visit">
+    <Key>
+      <PropertyRef Name="Num_vis" />
+    </Key>
+    <Property Name="Num_vis" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="id_ts" Type="uint" Nullable="false" />
+    <Property Name="id_location_place" Type="uint" Nullable="false" />
+    <Property Name="DateIn" Type="char" Nullable="false" />
+    <Property Name="DateOut" Type="char" />
+    <Property Name="FirstAttemptGoOut" Type="char" />
+    <Property Name="NextAttemptGoOut" Type="char" />
+    <Property Name="id_vis_param" Type="uint" Nullable="false" />
+    <Property Name="Status" Type="char" Nullable="false" />
+  </EntityType>
+  <EntityType Name="visitparameters">
+    <Key>
+      <PropertyRef Name="id_vis_param" />
+    </Key>
+    <Property Name="id_vis_param" Type="uint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="FirstFreeTimeInMinutes" Type="int" Nullable="false" />
+    <Property Name="FirstFreeTimeOnChangeBalans" Type="int" Nullable="false" />
+    <Property Name="PriceForIn" Type="int" Nullable="false" />
+    <Property Name="Status" Type="char" Nullable="false" />
+  </EntityType>
+  <Association Name="balance_ibfk_1">
+    <End Role="usr" Type="parkgModel.Store.usr" Multiplicity="1" />
+    <End Role="balance" Type="parkgModel.Store.balance" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="balance">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="levelszone_ibfk_1">
+    <End Role="parkingzones" Type="parkgModel.Store.parkingzones" Multiplicity="1" />
+    <End Role="levelszone" Type="parkgModel.Store.levelszone" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="parkingzones">
+        <PropertyRef Name="Parking_zone" />
+      </Principal>
+      <Dependent Role="levelszone">
+        <PropertyRef Name="Parking_zone" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="parkingzones_ibfk_1">
+    <End Role="type_parking" Type="parkgModel.Store.type_parking" Multiplicity="1" />
+    <End Role="parkingzones" Type="parkgModel.Store.parkingzones" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="type_parking">
+        <PropertyRef Name="id_type" />
+      </Principal>
+      <Dependent Role="parkingzones">
+        <PropertyRef Name="id_type" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="places_ibfk_1">
+    <End Role="levelszone" Type="parkgModel.Store.levelszone" Multiplicity="1" />
+    <End Role="places" Type="parkgModel.Store.places" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="levelszone">
+        <PropertyRef Name="id_location_level" />
+      </Principal>
+      <Dependent Role="places">
+        <PropertyRef Name="id_location_level" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="places_ibfk_2">
+    <End Role="tariffsonplaces" Type="parkgModel.Store.tariffsonplaces" Multiplicity="1" />
+    <End Role="places" Type="parkgModel.Store.places" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tariffsonplaces">
+        <PropertyRef Name="id_tariff_on_place" />
+      </Principal>
+      <Dependent Role="places">
+        <PropertyRef Name="id_tariff_on_place" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="reservation_ibfk_1">
+    <End Role="reservation_tariff" Type="parkgModel.Store.reservation_tariff" Multiplicity="1" />
+    <End Role="reservation" Type="parkgModel.Store.reservation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="reservation_tariff">
+        <PropertyRef Name="id_Reservation_Tariff" />
+      </Principal>
+      <Dependent Role="reservation">
+        <PropertyRef Name="id_Reservation_Tariff" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="reservation_ibfk_2">
+    <End Role="usr" Type="parkgModel.Store.usr" Multiplicity="1" />
+    <End Role="reservation" Type="parkgModel.Store.reservation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="reservation">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="reservation_ibfk_3">
+    <End Role="places" Type="parkgModel.Store.places" Multiplicity="1" />
+    <End Role="reservation" Type="parkgModel.Store.reservation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="places">
+        <PropertyRef Name="id_location_place" />
+      </Principal>
+      <Dependent Role="reservation">
+        <PropertyRef Name="id_location_place" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="ts_ibfk_1">
+    <End Role="usr" Type="parkgModel.Store.usr" Multiplicity="1" />
+    <End Role="ts" Type="parkgModel.Store.ts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="ts">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="usingunlimitedtariffs_ibfk_1">
+    <End Role="unlimitedtariff" Type="parkgModel.Store.unlimitedtariff" Multiplicity="1" />
+    <End Role="usingunlimitedtariffs" Type="parkgModel.Store.usingunlimitedtariffs" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="unlimitedtariff">
+        <PropertyRef Name="Name" />
+      </Principal>
+      <Dependent Role="usingunlimitedtariffs">
+        <PropertyRef Name="Name" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="usingunlimitedtariffs_ibfk_2">
+    <End Role="usr" Type="parkgModel.Store.usr" Multiplicity="1" />
+    <End Role="usingunlimitedtariffs" Type="parkgModel.Store.usingunlimitedtariffs" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="usingunlimitedtariffs">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="visit_ibfk_1">
+    <End Role="ts" Type="parkgModel.Store.ts" Multiplicity="1" />
+    <End Role="visit" Type="parkgModel.Store.visit" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ts">
+        <PropertyRef Name="id_ts" />
+      </Principal>
+      <Dependent Role="visit">
+        <PropertyRef Name="id_ts" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="visit_ibfk_2">
+    <End Role="places" Type="parkgModel.Store.places" Multiplicity="1" />
+    <End Role="visit" Type="parkgModel.Store.visit" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="places">
+        <PropertyRef Name="id_location_place" />
+      </Principal>
+      <Dependent Role="visit">
+        <PropertyRef Name="id_location_place" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="visit_ibfk_3">
+    <End Role="visitparameters" Type="parkgModel.Store.visitparameters" Multiplicity="1" />
+    <End Role="visit" Type="parkgModel.Store.visit" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="visitparameters">
+        <PropertyRef Name="id_vis_param" />
+      </Principal>
+      <Dependent Role="visit">
+        <PropertyRef Name="id_vis_param" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

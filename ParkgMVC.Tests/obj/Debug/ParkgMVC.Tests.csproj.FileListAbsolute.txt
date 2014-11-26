@@ -1,0 +1,36 @@
+E:\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll.config
+E:\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll
+E:\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.pdb
+E:\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.dll
+E:\ParkgMVC\ParkgMVC.Tests\bin\Debug\MySql.Data.dll
+E:\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.pdb
+E:\ParkgMVC\ParkgMVC.Tests\obj\Debug\ResolveAssemblyReference.cache
+E:\ParkgMVC\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.dll
+E:\ParkgMVC\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.pdb
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll.config
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.pdb
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.dll
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\bin\Debug\MySql.Data.dll
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.pdb
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.dll
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.pdb
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll.config
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.pdb
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.dll
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\bin\Debug\MySql.Data.dll
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\bin\Debug\ParkgMVC.pdb
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.csprojResolveAssemblyReference.cache
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.dll
+D:\!ISG\ParkgMVC\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.pdb
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll.config
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\bin\Debug\ParkgMVC.Tests.pdb
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\bin\Debug\ParkgMVC.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\bin\Debug\EntityFramework.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\bin\Debug\ParkgMVC.pdb
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.csprojResolveAssemblyReference.cache
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC.Tests\obj\Debug\ParkgMVC.Tests.pdb

@@ -1,0 +1,27 @@
+E:\ParkgMVC\ParkgMVC\bin\ParkgMVC.dll
+E:\ParkgMVC\ParkgMVC\bin\ParkgMVC.pdb
+E:\ParkgMVC\ParkgMVC\bin\MySql.Data.dll
+E:\ParkgMVC\ParkgMVC\obj\Debug\ResolveAssemblyReference.cache
+E:\ParkgMVC\ParkgMVC\obj\Debug\ParkgMVC.dll
+E:\ParkgMVC\ParkgMVC\obj\Debug\ParkgMVC.pdb
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC\bin\ParkgMVC.dll
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC\bin\ParkgMVC.pdb
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC\bin\MySql.Data.dll
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC\obj\Debug\ResolveAssemblyReference.cache
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC\obj\Debug\ParkgMVC.dll
+C:\visual studio 2010 Projects\ParkgMVC\ParkgMVC\obj\Debug\ParkgMVC.pdb
+D:\!ISG\ParkgMVC\ParkgMVC\bin\ParkgMVC.dll
+D:\!ISG\ParkgMVC\ParkgMVC\bin\ParkgMVC.pdb
+D:\!ISG\ParkgMVC\ParkgMVC\bin\MySql.Data.dll
+D:\!ISG\ParkgMVC\ParkgMVC\obj\Debug\ParkgMVC.dll
+D:\!ISG\ParkgMVC\ParkgMVC\obj\Debug\ParkgMVC.pdb
+D:\!ISG\ParkgMVC\ParkgMVC\obj\Debug\ParkgMVC.csprojResolveAssemblyReference.cache
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\ParkgMVC.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\ParkgMVC.pdb
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\EntityFramework.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\EntityFramework.resources.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\MySql.Data.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\MySql.Data.Entity.EF6.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\obj\Debug\ParkgMVC.dll
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\obj\Debug\ParkgMVC.pdb
+D:\!WIN_7\!!!mynewexperiment\ParkgMVC\obj\Debug\ParkgMVC.csprojResolveAssemblyReference.cache

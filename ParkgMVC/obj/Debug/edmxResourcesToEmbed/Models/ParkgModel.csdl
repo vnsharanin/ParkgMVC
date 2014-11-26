@@ -1,0 +1,415 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="parkgModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+  <EntityContainer Name="parkgEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="balance" EntityType="parkgModel.balance" />
+    <EntitySet Name="levelszone" EntityType="parkgModel.levelszone" />
+    <EntitySet Name="parkingzones" EntityType="parkgModel.parkingzones" />
+    <EntitySet Name="places" EntityType="parkgModel.places" />
+    <EntitySet Name="reservation" EntityType="parkgModel.reservation" />
+    <EntitySet Name="reservation_tariff" EntityType="parkgModel.reservation_tariff" />
+    <EntitySet Name="tariffsonplaces" EntityType="parkgModel.tariffsonplaces" />
+    <EntitySet Name="ts" EntityType="parkgModel.ts" />
+    <EntitySet Name="type_parking" EntityType="parkgModel.type_parking" />
+    <EntitySet Name="unlimitedtariff" EntityType="parkgModel.unlimitedtariff" />
+    <EntitySet Name="usingunlimitedtariffs" EntityType="parkgModel.usingunlimitedtariffs" />
+    <EntitySet Name="usr" EntityType="parkgModel.usr" />
+    <EntitySet Name="visit" EntityType="parkgModel.visit" />
+    <EntitySet Name="visitparameters" EntityType="parkgModel.visitparameters" />
+    <AssociationSet Name="balance_ibfk_1" Association="parkgModel.balance_ibfk_1">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="balance" EntitySet="balance" />
+    </AssociationSet>
+    <AssociationSet Name="levelszone_ibfk_1" Association="parkgModel.levelszone_ibfk_1">
+      <End Role="parkingzones" EntitySet="parkingzones" />
+      <End Role="levelszone" EntitySet="levelszone" />
+    </AssociationSet>
+    <AssociationSet Name="places_ibfk_1" Association="parkgModel.places_ibfk_1">
+      <End Role="levelszone" EntitySet="levelszone" />
+      <End Role="places" EntitySet="places" />
+    </AssociationSet>
+    <AssociationSet Name="parkingzones_ibfk_1" Association="parkgModel.parkingzones_ibfk_1">
+      <End Role="type_parking" EntitySet="type_parking" />
+      <End Role="parkingzones" EntitySet="parkingzones" />
+    </AssociationSet>
+    <AssociationSet Name="places_ibfk_2" Association="parkgModel.places_ibfk_2">
+      <End Role="tariffsonplaces" EntitySet="tariffsonplaces" />
+      <End Role="places" EntitySet="places" />
+    </AssociationSet>
+    <AssociationSet Name="reservation_ibfk_3" Association="parkgModel.reservation_ibfk_3">
+      <End Role="places" EntitySet="places" />
+      <End Role="reservation" EntitySet="reservation" />
+    </AssociationSet>
+    <AssociationSet Name="visit_ibfk_2" Association="parkgModel.visit_ibfk_2">
+      <End Role="places" EntitySet="places" />
+      <End Role="visit" EntitySet="visit" />
+    </AssociationSet>
+    <AssociationSet Name="reservation_ibfk_1" Association="parkgModel.reservation_ibfk_1">
+      <End Role="reservation_tariff" EntitySet="reservation_tariff" />
+      <End Role="reservation" EntitySet="reservation" />
+    </AssociationSet>
+    <AssociationSet Name="reservation_ibfk_2" Association="parkgModel.reservation_ibfk_2">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="reservation" EntitySet="reservation" />
+    </AssociationSet>
+    <AssociationSet Name="ts_ibfk_1" Association="parkgModel.ts_ibfk_1">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="ts" EntitySet="ts" />
+    </AssociationSet>
+    <AssociationSet Name="visit_ibfk_1" Association="parkgModel.visit_ibfk_1">
+      <End Role="ts" EntitySet="ts" />
+      <End Role="visit" EntitySet="visit" />
+    </AssociationSet>
+    <AssociationSet Name="usingunlimitedtariffs_ibfk_1" Association="parkgModel.usingunlimitedtariffs_ibfk_1">
+      <End Role="unlimitedtariff" EntitySet="unlimitedtariff" />
+      <End Role="usingunlimitedtariffs" EntitySet="usingunlimitedtariffs" />
+    </AssociationSet>
+    <AssociationSet Name="usingunlimitedtariffs_ibfk_2" Association="parkgModel.usingunlimitedtariffs_ibfk_2">
+      <End Role="usr" EntitySet="usr" />
+      <End Role="usingunlimitedtariffs" EntitySet="usingunlimitedtariffs" />
+    </AssociationSet>
+    <AssociationSet Name="visit_ibfk_3" Association="parkgModel.visit_ibfk_3">
+      <End Role="visitparameters" EntitySet="visitparameters" />
+      <End Role="visit" EntitySet="visit" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="balance">
+    <Key>
+      <PropertyRef Name="operation_id" />
+    </Key>
+    <Property Name="operation_id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Type_Operation" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Sum" Type="Double" />
+    <Property Name="Now_Balance" Type="Double" />
+    <Property Name="Login" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Description" Type="String" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="usr" Relationship="parkgModel.balance_ibfk_1" FromRole="balance" ToRole="usr" />
+  </EntityType>
+  <EntityType Name="levelszone">
+    <Key>
+      <PropertyRef Name="id_location_level" />
+    </Key>
+    <Property Name="id_location_level" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Parking_zone" Type="Int32" Nullable="false" />
+    <Property Name="Level" Type="Int32" Nullable="false" />
+    <Property Name="TypeLevel" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="parkingzones" Relationship="parkgModel.levelszone_ibfk_1" FromRole="levelszone" ToRole="parkingzones" />
+    <NavigationProperty Name="places" Relationship="parkgModel.places_ibfk_1" FromRole="levelszone" ToRole="places" />
+  </EntityType>
+  <EntityType Name="parkingzones">
+    <Key>
+      <PropertyRef Name="Parking_zone" />
+    </Key>
+    <Property Name="Parking_zone" Type="Int32" Nullable="false" />
+    <Property Name="id_type" Type="Int64" Nullable="false" />
+    <Property Name="Address" Type="String" Nullable="false" MaxLength="50" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="levelszone" Relationship="parkgModel.levelszone_ibfk_1" FromRole="parkingzones" ToRole="levelszone" />
+    <NavigationProperty Name="type_parking" Relationship="parkgModel.parkingzones_ibfk_1" FromRole="parkingzones" ToRole="type_parking" />
+  </EntityType>
+  <EntityType Name="places">
+    <Key>
+      <PropertyRef Name="id_location_place" />
+    </Key>
+    <Property Name="id_location_place" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="id_location_level" Type="Int64" Nullable="false" />
+    <Property Name="Place" Type="Int32" Nullable="false" />
+    <Property Name="Status" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="id_tariff_on_place" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="levelszone" Relationship="parkgModel.places_ibfk_1" FromRole="places" ToRole="levelszone" />
+    <NavigationProperty Name="tariffsonplaces" Relationship="parkgModel.places_ibfk_2" FromRole="places" ToRole="tariffsonplaces" />
+    <NavigationProperty Name="reservation" Relationship="parkgModel.reservation_ibfk_3" FromRole="places" ToRole="reservation" />
+    <NavigationProperty Name="visit" Relationship="parkgModel.visit_ibfk_2" FromRole="places" ToRole="visit" />
+  </EntityType>
+  <EntityType Name="reservation">
+    <Key>
+      <PropertyRef Name="id_reservation_user" />
+    </Key>
+    <Property Name="id_reservation_user" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="id_Reservation_Tariff" Type="Int64" Nullable="false" />
+    <Property Name="Login" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="DateReservation" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="id_location_place" Type="Int64" Nullable="false" />
+    <Property Name="StatusReservation" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="places" Relationship="parkgModel.reservation_ibfk_3" FromRole="reservation" ToRole="places" />
+    <NavigationProperty Name="reservation_tariff" Relationship="parkgModel.reservation_ibfk_1" FromRole="reservation" ToRole="reservation_tariff" />
+    <NavigationProperty Name="usr" Relationship="parkgModel.reservation_ibfk_2" FromRole="reservation" ToRole="usr" />
+  </EntityType>
+  <EntityType Name="reservation_tariff">
+    <Key>
+      <PropertyRef Name="id_Reservation_Tariff" />
+    </Key>
+    <Property Name="id_Reservation_Tariff" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="FirstFreeTimeInHours" Type="Int32" Nullable="false" />
+    <Property Name="PriceInRubForHourHightFreeTime" Type="Int32" Nullable="false" />
+    <Property Name="PriceInRubForHourHightFreeTimeWithUnlimitedTariff" Type="Int32" Nullable="false" />
+    <Property Name="Status" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="ValidityPeriodFromTheTimeOfActivationInHour" Type="Int32" Nullable="false" />
+    <Property Name="PriceForRevokeOrNotVisiting" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="reservation" Relationship="parkgModel.reservation_ibfk_1" FromRole="reservation_tariff" ToRole="reservation" />
+  </EntityType>
+  <EntityType Name="tariffsonplaces">
+    <Key>
+      <PropertyRef Name="id_tariff_on_place" />
+    </Key>
+    <Property Name="id_tariff_on_place" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="SupportClimateControl" Type="String" Nullable="false" MaxLength="3" Unicode="false" FixedLength="false" />
+    <Property Name="Type" Type="String" Nullable="false" MaxLength="6" Unicode="false" FixedLength="false" />
+    <Property Name="Status" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="PriceForHourWithoutUnlimitedTariff" Type="Int32" Nullable="false" />
+    <Property Name="PriceForHourWithUnlimitedTariff" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="places" Relationship="parkgModel.places_ibfk_2" FromRole="tariffsonplaces" ToRole="places" />
+  </EntityType>
+  <EntityType Name="ts">
+    <Key>
+      <PropertyRef Name="id_ts" />
+    </Key>
+    <Property Name="id_ts" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Number" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Company" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Mode" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Login" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Visible" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="usr" Relationship="parkgModel.ts_ibfk_1" FromRole="ts" ToRole="usr" />
+    <NavigationProperty Name="visit" Relationship="parkgModel.visit_ibfk_1" FromRole="ts" ToRole="visit" />
+  </EntityType>
+  <EntityType Name="type_parking">
+    <Key>
+      <PropertyRef Name="id_type" />
+    </Key>
+    <Property Name="id_type" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Name" Type="String" Nullable="false" MaxLength="30" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="parkingzones" Relationship="parkgModel.parkingzones_ibfk_1" FromRole="type_parking" ToRole="parkingzones" />
+  </EntityType>
+  <EntityType Name="unlimitedtariff">
+    <Key>
+      <PropertyRef Name="Name" />
+    </Key>
+    <Property Name="Name" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Num_days" Type="Int32" />
+    <Property Name="Max_Num_visits_in_this_tariff" Type="Int32" />
+    <Property Name="Price" Type="Int32" Nullable="false" />
+    <Property Name="Status" Type="String" Nullable="false" MaxLength="25" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="usingunlimitedtariffs" Relationship="parkgModel.usingunlimitedtariffs_ibfk_1" FromRole="unlimitedtariff" ToRole="usingunlimitedtariffs" />
+  </EntityType>
+  <EntityType Name="usingunlimitedtariffs">
+    <Key>
+      <PropertyRef Name="id" />
+    </Key>
+    <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Name" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="DateConnection" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Status" Type="String" Nullable="false" MaxLength="20" Unicode="false" FixedLength="false" />
+    <Property Name="NumOfVisitsMadeWithUsingThisTariff" Type="Int32" Nullable="false" />
+    <Property Name="Login" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="DateUnconnectionOrRevoke" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="unlimitedtariff" Relationship="parkgModel.usingunlimitedtariffs_ibfk_1" FromRole="usingunlimitedtariffs" ToRole="unlimitedtariff" />
+    <NavigationProperty Name="usr" Relationship="parkgModel.usingunlimitedtariffs_ibfk_2" FromRole="usingunlimitedtariffs" ToRole="usr" />
+  </EntityType>
+  <EntityType Name="usr">
+    <Key>
+      <PropertyRef Name="Login" />
+    </Key>
+    <Property Name="Login" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="FIO" Type="String" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="Num_Card_Driver" Type="Int32" />
+    <NavigationProperty Name="balance" Relationship="parkgModel.balance_ibfk_1" FromRole="usr" ToRole="balance" />
+    <NavigationProperty Name="reservation" Relationship="parkgModel.reservation_ibfk_2" FromRole="usr" ToRole="reservation" />
+    <NavigationProperty Name="ts" Relationship="parkgModel.ts_ibfk_1" FromRole="usr" ToRole="ts" />
+    <NavigationProperty Name="usingunlimitedtariffs" Relationship="parkgModel.usingunlimitedtariffs_ibfk_2" FromRole="usr" ToRole="usingunlimitedtariffs" />
+  </EntityType>
+  <EntityType Name="visit">
+    <Key>
+      <PropertyRef Name="Num_vis" />
+    </Key>
+    <Property Name="Num_vis" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="id_ts" Type="Int64" Nullable="false" />
+    <Property Name="id_location_place" Type="Int64" Nullable="false" />
+    <Property Name="DateIn" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="DateOut" Type="String" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="FirstAttemptGoOut" Type="String" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="NextAttemptGoOut" Type="String" MaxLength="255" Unicode="false" FixedLength="false" />
+    <Property Name="id_vis_param" Type="Int64" Nullable="false" />
+    <Property Name="Status" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="places" Relationship="parkgModel.visit_ibfk_2" FromRole="visit" ToRole="places" />
+    <NavigationProperty Name="ts" Relationship="parkgModel.visit_ibfk_1" FromRole="visit" ToRole="ts" />
+    <NavigationProperty Name="visitparameters" Relationship="parkgModel.visit_ibfk_3" FromRole="visit" ToRole="visitparameters" />
+  </EntityType>
+  <EntityType Name="visitparameters">
+    <Key>
+      <PropertyRef Name="id_vis_param" />
+    </Key>
+    <Property Name="id_vis_param" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="FirstFreeTimeInMinutes" Type="Int32" Nullable="false" />
+    <Property Name="FirstFreeTimeOnChangeBalans" Type="Int32" Nullable="false" />
+    <Property Name="PriceForIn" Type="Int32" Nullable="false" />
+    <Property Name="Status" Type="String" Nullable="false" MaxLength="255" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="visit" Relationship="parkgModel.visit_ibfk_3" FromRole="visitparameters" ToRole="visit" />
+  </EntityType>
+  <Association Name="balance_ibfk_1">
+    <End Role="usr" Type="parkgModel.usr" Multiplicity="1" />
+    <End Role="balance" Type="parkgModel.balance" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="balance">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="levelszone_ibfk_1">
+    <End Role="parkingzones" Type="parkgModel.parkingzones" Multiplicity="1" />
+    <End Role="levelszone" Type="parkgModel.levelszone" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="parkingzones">
+        <PropertyRef Name="Parking_zone" />
+      </Principal>
+      <Dependent Role="levelszone">
+        <PropertyRef Name="Parking_zone" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="places_ibfk_1">
+    <End Role="levelszone" Type="parkgModel.levelszone" Multiplicity="1" />
+    <End Role="places" Type="parkgModel.places" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="levelszone">
+        <PropertyRef Name="id_location_level" />
+      </Principal>
+      <Dependent Role="places">
+        <PropertyRef Name="id_location_level" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="parkingzones_ibfk_1">
+    <End Role="type_parking" Type="parkgModel.type_parking" Multiplicity="1" />
+    <End Role="parkingzones" Type="parkgModel.parkingzones" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="type_parking">
+        <PropertyRef Name="id_type" />
+      </Principal>
+      <Dependent Role="parkingzones">
+        <PropertyRef Name="id_type" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="places_ibfk_2">
+    <End Role="tariffsonplaces" Type="parkgModel.tariffsonplaces" Multiplicity="1" />
+    <End Role="places" Type="parkgModel.places" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tariffsonplaces">
+        <PropertyRef Name="id_tariff_on_place" />
+      </Principal>
+      <Dependent Role="places">
+        <PropertyRef Name="id_tariff_on_place" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="reservation_ibfk_3">
+    <End Role="places" Type="parkgModel.places" Multiplicity="1" />
+    <End Role="reservation" Type="parkgModel.reservation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="places">
+        <PropertyRef Name="id_location_place" />
+      </Principal>
+      <Dependent Role="reservation">
+        <PropertyRef Name="id_location_place" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="visit_ibfk_2">
+    <End Role="places" Type="parkgModel.places" Multiplicity="1" />
+    <End Role="visit" Type="parkgModel.visit" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="places">
+        <PropertyRef Name="id_location_place" />
+      </Principal>
+      <Dependent Role="visit">
+        <PropertyRef Name="id_location_place" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="reservation_ibfk_1">
+    <End Role="reservation_tariff" Type="parkgModel.reservation_tariff" Multiplicity="1" />
+    <End Role="reservation" Type="parkgModel.reservation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="reservation_tariff">
+        <PropertyRef Name="id_Reservation_Tariff" />
+      </Principal>
+      <Dependent Role="reservation">
+        <PropertyRef Name="id_Reservation_Tariff" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="reservation_ibfk_2">
+    <End Role="usr" Type="parkgModel.usr" Multiplicity="1" />
+    <End Role="reservation" Type="parkgModel.reservation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="reservation">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="ts_ibfk_1">
+    <End Role="usr" Type="parkgModel.usr" Multiplicity="1" />
+    <End Role="ts" Type="parkgModel.ts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="ts">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="visit_ibfk_1">
+    <End Role="ts" Type="parkgModel.ts" Multiplicity="1" />
+    <End Role="visit" Type="parkgModel.visit" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ts">
+        <PropertyRef Name="id_ts" />
+      </Principal>
+      <Dependent Role="visit">
+        <PropertyRef Name="id_ts" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="usingunlimitedtariffs_ibfk_1">
+    <End Role="unlimitedtariff" Type="parkgModel.unlimitedtariff" Multiplicity="1" />
+    <End Role="usingunlimitedtariffs" Type="parkgModel.usingunlimitedtariffs" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="unlimitedtariff">
+        <PropertyRef Name="Name" />
+      </Principal>
+      <Dependent Role="usingunlimitedtariffs">
+        <PropertyRef Name="Name" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="usingunlimitedtariffs_ibfk_2">
+    <End Role="usr" Type="parkgModel.usr" Multiplicity="1" />
+    <End Role="usingunlimitedtariffs" Type="parkgModel.usingunlimitedtariffs" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="usr">
+        <PropertyRef Name="Login" />
+      </Principal>
+      <Dependent Role="usingunlimitedtariffs">
+        <PropertyRef Name="Login" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="visit_ibfk_3">
+    <End Role="visitparameters" Type="parkgModel.visitparameters" Multiplicity="1" />
+    <End Role="visit" Type="parkgModel.visit" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="visitparameters">
+        <PropertyRef Name="id_vis_param" />
+      </Principal>
+      <Dependent Role="visit">
+        <PropertyRef Name="id_vis_param" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

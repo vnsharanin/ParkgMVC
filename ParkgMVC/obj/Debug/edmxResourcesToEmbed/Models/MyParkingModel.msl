@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="Хранилище MyParkingModel2Container" CdmEntityContainer="MyParkingEntities">
+    <EntitySetMapping Name="balance">
+      <EntityTypeMapping TypeName="MyParkingModel2.balance">
+        <MappingFragment StoreEntitySet="balance">
+          <ScalarProperty Name="operation_id" ColumnName="operation_id" />
+          <ScalarProperty Name="Type_Operation" ColumnName="Type_Operation" />
+          <ScalarProperty Name="Sum" ColumnName="Sum" />
+          <ScalarProperty Name="BalanceAfterOperation" ColumnName="BalanceAfterOperation" />
+          <ScalarProperty Name="Login" ColumnName="Login" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="DateOperation" ColumnName="DateOperation" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="levelzone">
+      <EntityTypeMapping TypeName="MyParkingModel2.levelzone">
+        <MappingFragment StoreEntitySet="levelzone">
+          <ScalarProperty Name="id_location_level" ColumnName="id_location_level" />
+          <ScalarProperty Name="Parking_zone" ColumnName="Parking_zone" />
+          <ScalarProperty Name="Level" ColumnName="Level" />
+          <ScalarProperty Name="TypeLevel" ColumnName="TypeLevel" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="parkingzone">
+      <EntityTypeMapping TypeName="MyParkingModel2.parkingzone">
+        <MappingFragment StoreEntitySet="parkingzone">
+          <ScalarProperty Name="Parking_zone" ColumnName="Parking_zone" />
+          <ScalarProperty Name="id_type" ColumnName="id_type" />
+          <ScalarProperty Name="Address" ColumnName="Address" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="place">
+      <EntityTypeMapping TypeName="MyParkingModel2.place">
+        <MappingFragment StoreEntitySet="place">
+          <ScalarProperty Name="id_location_place" ColumnName="id_location_place" />
+          <ScalarProperty Name="id_location_level" ColumnName="id_location_level" />
+          <ScalarProperty Name="NumberPlace" ColumnName="NumberPlace" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="id_tariff_on_place" ColumnName="id_tariff_on_place" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="reservation">
+      <EntityTypeMapping TypeName="MyParkingModel2.reservation">
+        <MappingFragment StoreEntitySet="reservation">
+          <ScalarProperty Name="id_reservation_user" ColumnName="id_reservation_user" />
+          <ScalarProperty Name="id_Reservation_Tariff" ColumnName="id_Reservation_Tariff" />
+          <ScalarProperty Name="Login" ColumnName="Login" />
+          <ScalarProperty Name="DateConnection" ColumnName="DateConnection" />
+          <ScalarProperty Name="id_location_place" ColumnName="id_location_place" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="DateOutFromActivity" ColumnName="DateOutFromActivity" />
+          <ScalarProperty Name="ApproximatelyDateOutFromActivity" ColumnName="ApproximatelyDateOutFromActivity" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="reservation_tariff">
+      <EntityTypeMapping TypeName="MyParkingModel2.reservation_tariff">
+        <MappingFragment StoreEntitySet="reservation_tariff">
+          <ScalarProperty Name="id_Reservation_Tariff" ColumnName="id_Reservation_Tariff" />
+          <ScalarProperty Name="FirstFreeTimeInMinutes" ColumnName="FirstFreeTimeInMinutes" />
+          <ScalarProperty Name="PriceInRubForHourHightFreeTime" ColumnName="PriceInRubForHourHightFreeTime" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="ValidityPeriodFromTheTimeOfActivationInHour" ColumnName="ValidityPeriodFromTheTimeOfActivationInHour" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tariffonabonementforvisit">
+      <EntityTypeMapping TypeName="MyParkingModel2.tariffonabonementforvisit">
+        <MappingFragment StoreEntitySet="tariffonabonementforvisit">
+          <ScalarProperty Name="Name_tariff_on_abonement" ColumnName="Name_tariff_on_abonement" />
+          <ScalarProperty Name="Num_days" ColumnName="Num_days" />
+          <ScalarProperty Name="Max_Num_visits_in_this_tariff" ColumnName="Max_Num_visits_in_this_tariff" />
+          <ScalarProperty Name="Price" ColumnName="Price" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tariffonplace">
+      <EntityTypeMapping TypeName="MyParkingModel2.tariffonplace">
+        <MappingFragment StoreEntitySet="tariffonplace">
+          <ScalarProperty Name="id_tariff_on_place" ColumnName="id_tariff_on_place" />
+          <ScalarProperty Name="SupportClimateControl" ColumnName="SupportClimateControl" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="PriceForHourWithoutAbonement" ColumnName="PriceForHourWithoutAbonement" />
+          <ScalarProperty Name="PriceForHourWithAbonement" ColumnName="PriceForHourWithAbonement" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ts">
+      <EntityTypeMapping TypeName="MyParkingModel2.ts">
+        <MappingFragment StoreEntitySet="ts">
+          <ScalarProperty Name="id_ts" ColumnName="id_ts" />
+          <ScalarProperty Name="Number" ColumnName="Number" />
+          <ScalarProperty Name="Company" ColumnName="Company" />
+          <ScalarProperty Name="Mode" ColumnName="Mode" />
+          <ScalarProperty Name="Login" ColumnName="Login" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="type_parking">
+      <EntityTypeMapping TypeName="MyParkingModel2.type_parking">
+        <MappingFragment StoreEntitySet="type_parking">
+          <ScalarProperty Name="id_type" ColumnName="id_type" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="usingtariffonabonementforvisit">
+      <EntityTypeMapping TypeName="MyParkingModel2.usingtariffonabonementforvisit">
+        <MappingFragment StoreEntitySet="usingtariffonabonementforvisit">
+          <ScalarProperty Name="id_abonement" ColumnName="id_abonement" />
+          <ScalarProperty Name="Name_tariff_on_abonement" ColumnName="Name_tariff_on_abonement" />
+          <ScalarProperty Name="DateConnection" ColumnName="DateConnection" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="NumOfVisitsMadeWithUsingThisTariff" ColumnName="NumOfVisitsMadeWithUsingThisTariff" />
+          <ScalarProperty Name="Login" ColumnName="Login" />
+          <ScalarProperty Name="DateOutFromActivity" ColumnName="DateOutFromActivity" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="usr">
+      <EntityTypeMapping TypeName="MyParkingModel2.usr">
+        <MappingFragment StoreEntitySet="usr">
+          <ScalarProperty Name="Login" ColumnName="Login" />
+          <ScalarProperty Name="FIO" ColumnName="FIO" />
+          <ScalarProperty Name="Num_Card_Driver" ColumnName="Num_Card_Driver" />
+          <ScalarProperty Name="Now_Balance" ColumnName="Now_Balance" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="visit">
+      <EntityTypeMapping TypeName="MyParkingModel2.visit">
+        <MappingFragment StoreEntitySet="visit">
+          <ScalarProperty Name="Num_vis" ColumnName="Num_vis" />
+          <ScalarProperty Name="id_ts" ColumnName="id_ts" />
+          <ScalarProperty Name="id_location_place" ColumnName="id_location_place" />
+          <ScalarProperty Name="DateIn" ColumnName="DateIn" />
+          <ScalarProperty Name="DateOut" ColumnName="DateOut" />
+          <ScalarProperty Name="FirstAttemptGoOut" ColumnName="FirstAttemptGoOut" />
+          <ScalarProperty Name="NextAttemptGoOut" ColumnName="NextAttemptGoOut" />
+          <ScalarProperty Name="id_vis_param" ColumnName="id_vis_param" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="visitparameters">
+      <EntityTypeMapping TypeName="MyParkingModel2.visitparameters">
+        <MappingFragment StoreEntitySet="visitparameters">
+          <ScalarProperty Name="id_vis_param" ColumnName="id_vis_param" />
+          <ScalarProperty Name="FirstFreeTimeInMinutes" ColumnName="FirstFreeTimeInMinutes" />
+          <ScalarProperty Name="FirstFreeTimeOnChangeBalans" ColumnName="FirstFreeTimeOnChangeBalans" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>
