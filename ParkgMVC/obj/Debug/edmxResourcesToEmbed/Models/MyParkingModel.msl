@@ -42,6 +42,7 @@
           <ScalarProperty Name="NumberPlace" ColumnName="NumberPlace" />
           <ScalarProperty Name="Status" ColumnName="Status" />
           <ScalarProperty Name="id_tariff_on_place" ColumnName="id_tariff_on_place" />
+          <ScalarProperty Name="id_alternative_tariff_on_place" ColumnName="id_alternative_tariff_on_place" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -53,9 +54,11 @@
           <ScalarProperty Name="Login" ColumnName="Login" />
           <ScalarProperty Name="DateConnection" ColumnName="DateConnection" />
           <ScalarProperty Name="id_location_place" ColumnName="id_location_place" />
+          <ScalarProperty Name="id_alternative_location_place" ColumnName="id_alternative_location_place" />
           <ScalarProperty Name="Status" ColumnName="Status" />
           <ScalarProperty Name="DateOutFromActivity" ColumnName="DateOutFromActivity" />
           <ScalarProperty Name="ApproximatelyDateOutFromActivity" ColumnName="ApproximatelyDateOutFromActivity" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

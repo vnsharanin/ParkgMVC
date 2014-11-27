@@ -16,6 +16,7 @@ namespace ParkgMVC.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
+                ViewData["Error"] = "";
                 string Log = User.Identity.Name.ToString();
                 return View(mp.ts.Where(x => x.Login == Log & x.Status == "True").ToList());
             }
@@ -46,10 +47,13 @@ namespace ParkgMVC.Controllers
                 {
                     ts ts = new ts();
                     string Log = User.Identity.Name.ToString();
-                    if (ts.CreateTS(newts, Log))
+                    if (ts.CreateTS(newts, Log) == "1")
                         return RedirectToAction("TS");
                     else
+                    {
+                        ViewData["Code"] = ts.CreateTS(newts, Log);
                         return View("CreateTS");
+                    }
                 }
                 else
                     return View("CreateTS");
@@ -60,29 +64,28 @@ namespace ParkgMVC.Controllers
             }
         }
         
-        public ActionResult DeleteTS(Int32 Id_ts, string Company)
-        {
-            return View();
-        }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult DeleteTS(Int32 Id_ts)
+        [MultiButton(MatchFormKey = "TS", MatchFormValue = "Delete_TS")]
+        public ActionResult Delete_TS(Int32 id_ts)
         {
+            string Log = User.Identity.Name.ToString();
+            ViewData["Error"] = "";
             try
             {
                 ts ts = new ts();
-                string Log = User.Identity.Name.ToString();
-                if (ts.ChangeStatus(Id_ts, Log))
-                    return RedirectToAction("TS");
+                
+                if (ts.ChangeStatus(id_ts, Log)=="1")
+                    return View(mp.ts.Where(x => x.Login == Log & x.Status == "True").ToList());
                 else
                 {
-                    ViewData["Error"] = "Вы не можете удалить это ТС, поскольку у Вас подключена заявка на бронирование, которая требует наличие минимум одного ТС!";
-                    return View("DeleteTS");
+                    ViewData["Error"] = ts.ChangeStatus(id_ts, Log);
+                    return View(mp.ts.Where(x => x.Login == Log & x.Status == "True").ToList());
                 }
             }
             catch
             {
-                return View("DeleteTS");
+                return View(mp.ts.Where(x => x.Login == Log & x.Status == "True").ToList());
             }
         }
     }

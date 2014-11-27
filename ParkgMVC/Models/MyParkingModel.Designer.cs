@@ -1,4 +1,4 @@
-﻿// Создание кода T4 для модели "C:\PROJECT visual studio 2013\!!!\EFMySQLCrudTest1\EFMySQLCrudTest1\Models\MyParkingModel.edmx" включено. 
+﻿// Создание кода T4 для модели "c:\PROJECT visual studio 2013\!!!\EFMySQLCrudTest1\EFMySQLCrudTest1\Models\MyParkingModel.edmx" включено. 
 // Чтобы включить формирование кода прежних версий, измените значение свойства "Стратегия создания кода" конструктора
 // на "Legacy ObjectContext". Это свойство доступно в окне "Свойства", если модель
 // открыта в конструкторе.

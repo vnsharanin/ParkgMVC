@@ -5,7 +5,7 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-
+    <h1 style="color:#FF0000"><%: ViewData["Error"] %></h1>
     <h2>Index</h2>
 
     <table>
@@ -23,12 +23,11 @@
         </tr>
 
     <% foreach (var item in Model) { %>
-    
+    <% using (Html.BeginForm("TS", "TS", FormMethod.Post)){%>
+    <input type="hidden" name="id_ts" id="id_ts" value="<%: item.id_ts %>"/>
         <tr>
             <td>
-                <%: Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) %> |
-                <%: Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ })%> |
-                <%: Html.ActionLink("Delete", "DeleteTS", new { Id_ts = item.id_ts, Company = item.Company })%>
+                <input type="submit" name="TS" id="Delete_TS" value="Delete_TS" />
             </td>
             <td>
                 <%: item.Number %>
@@ -40,7 +39,7 @@
                 <%: item.Mode %>
             </td>
         </tr>
-    
+        <% } %>
     <% } %>
 
     </table>

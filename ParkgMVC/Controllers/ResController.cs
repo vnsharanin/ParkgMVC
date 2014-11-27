@@ -88,7 +88,7 @@ namespace ParkgMVC.Controllers
                             if (formed == null)
                             {
                                 reservation r = new reservation();
-                                r.CreateReservation("Formed", Log, 0, "Reservation wait full formed", check);
+                                r.CreateReservation("Reservation wait full formed", Log, check);
                             }
                             else if (formed != null)
                             {
@@ -118,14 +118,14 @@ namespace ParkgMVC.Controllers
         [MultiButton(MatchFormKey = "Reservation", MatchFormValue = "Connect")]
         public ActionResult Connect()
         {
+            reservation find = new reservation();
+            find.FindOnExpired();
             if (User.Identity.IsAuthenticated)
             {
                 string Log = User.Identity.Name.ToString();
                 string Date = DateTime.Now.ToString("dd.MM.yy HH:mm");
                 reservation formedres = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
-                    ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
-                    if (exist != null)
-                    {
+
                         reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
                         if (tar != null)
                         {
@@ -138,14 +138,23 @@ namespace ParkgMVC.Controllers
                                 {
                                     if (us.Now_Balance >= 0)
                                     {
-                                        formedres.Status = "Active";
-                                        formedres.DateConnection = Date;
-                                        DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
-                                        formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
-                                        mp.Entry(formedres).State = EntityState.Modified;
-                                        mp.SaveChanges();
-                                        place newplace = new place();
-                                        newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
+                                        ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
+                                        if (exist != null)
+                                        {
+                                            formedres.Status = "Active";
+                                            formedres.Description = "Reservation connect";
+                                            formedres.DateConnection = Date;
+                                            DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
+                                            formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
+                                            mp.Entry(formedres).State = EntityState.Modified;
+                                            mp.SaveChanges();
+                                            place newplace = new place();
+                                            newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
+                                        }
+                                        else
+                                        {
+                                            ViewData["AnswerFromReservation"] = "Активирование бронирования без наличия ТС запрещено!";
+                                        }
                                     }
                                     else if (us.Now_Balance < 0)
                                     {
@@ -168,12 +177,7 @@ namespace ParkgMVC.Controllers
                             ViewData["AnswerFromReservation"] = "Данный тариф бронирования не активен. Пожалуйста, переформируйте заявку!";
                         }
 
-                    }
 
-                    else
-                    {
-                        ViewData["AnswerFromReservation"] = "Активирование бронирование без наличия ТС запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после добавления вашего ТС!";
-                    }
                 
                 ViewData["ReservationTariff"] = mp.reservation_tariff.Where(x => x.Status == "available").ToList();
                 return View(mp.reservation.Where(x => x.Login == Log & (x.Status == "Formed" || x.Status == "Active")).ToList());
@@ -201,25 +205,27 @@ namespace ParkgMVC.Controllers
                         if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
                         {
                             n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
-                            n.Status = "Expired";
+                            n.Status = "Closed";
+                            n.Description = "Reservation was expired";
                             mp.Entry(n).State = EntityState.Modified;
                             mp.SaveChanges();
                             //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
                             //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
-                            r.Revoke("Reservation expired", n, n.ApproximatelyDateOutFromActivity);
+                            r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
 
                             //рассчитать средства и списать их со счета.
                         }
                         else if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) >= Convert.ToDateTime(Date))
                         {
                             n.DateOutFromActivity = Date;
-                            n.Status = "Revoke";
+                            n.Status = "Closed";
+                            n.Description = "Reservation was revoke";
                             mp.Entry(n).State = EntityState.Modified;
                             mp.SaveChanges();
                             //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
                             //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
                             reservation n1 = mp.reservation.Where(x => x.id_reservation_user == id_reservation_user).FirstOrDefault();
-                            r.Revoke("Revoke", n1, Date);
+                            r.Revoke("Reservation was revoke", n1, Date);
                             //рассчитать средства и списать их со счета.
                         }
                     }
@@ -258,12 +264,13 @@ namespace ParkgMVC.Controllers
                     if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
                     {
                         n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
-                        n.Status = "Expired";
+                        n.Status = "Closed";
+                        n.Description = "Reservation was expired";
                         mp.Entry(n).State = EntityState.Modified;
                         mp.SaveChanges();
                         //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
                         //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
-                        r.Revoke("Reservation expired", n, n.ApproximatelyDateOutFromActivity);
+                        r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
                         //рассчитать средства и списать их со счета.
                         break;
                     }

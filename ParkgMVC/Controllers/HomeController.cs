@@ -128,6 +128,8 @@ namespace ParkgMVC.Controllers
         [MultiButton(MatchFormKey = "Places", MatchFormValue = "ConnectReservation")]
         public ActionResult ConnectReservation(Int32 ChoosePlace, Int32 id_location_level, FormCollection form)
         {
+            reservation find = new reservation();
+            find.FindOnExpired();
             levelzone levz = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
             Int32 zone = levz.Parking_zone;
             Int32 level = levz.Level;
@@ -147,9 +149,7 @@ namespace ParkgMVC.Controllers
                     reservation formedres = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
                     if (formedres != null)
                     {
-                        ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
-                        if (exist != null)
-                        {
+
                             reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
                             if (tar != null)
                             {
@@ -160,25 +160,41 @@ namespace ParkgMVC.Controllers
                                 {
                                     if (us.Now_Balance >= 0)
                                     {
-                                        formedres.id_location_place = ChoosePlace;
-                                        formedres.Status = "Active";
-                                        formedres.DateConnection = Date;
-                                        DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
-                                        formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
-                                        mp.Entry(formedres).State = EntityState.Modified;
-                                        mp.SaveChanges();
-                                        place newplace = new place();
-                                        newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
-                                        //r.CreateReservation(, Log, ChoosePlace, Date, tar);
+                                        ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
+                                        if (exist != null)
+                                        {
+                                            //tariffOnplace p = mp.tariff_on_place.where(x=>x.id_tariff_on_place == tariff & x.Status == "Active")
+                                            //if p != null
+                                            formedres.id_location_place = ChoosePlace;
+                                            formedres.id_alternative_location_place = ChoosePlace;
+                                            formedres.Status = "Active";
+                                            formedres.Description = "Reservation connect";
+                                            formedres.DateConnection = Date;
+                                            DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
+                                            formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
+                                            mp.Entry(formedres).State = EntityState.Modified;
+                                            mp.SaveChanges();
+                                            place newplace = new place();
+                                            newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
+
+                                            //else p==null return сообщение что тариф для места изменился, отсылаю через вбю дата актуальные тарифы и места с актуальными тарифами
+                                            //Подумать стоит ли делать это(комментированный примерный код) в ResController при подключении брони
+                                        }
+                                        else
+                                        {
+                                            ViewData["ReservationPlace"] = "Активирование брони без наличия ТС запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после добавления вашего ТС!";
+                                            formedres.Edit(formedres, ChoosePlace);
+                                            return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                                        }
                                     }
                                     else if (us.Now_Balance < 0)
                                     {
                                         ViewData["ReservationPlace"] = "Активирование брони с отрицательным балансом запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после пополнения баланса!";
-                                        formedres.id_location_place = ChoosePlace;
-                                        mp.Entry(formedres).State = EntityState.Modified;
-                                        mp.SaveChanges();
+                                        formedres.Edit(formedres, ChoosePlace);
+
                                         return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
                                     }
+
                                 }
                                 else if (free == null)
                                 {
@@ -189,21 +205,9 @@ namespace ParkgMVC.Controllers
                             else
                             {
                                 //У формируемой брони изменился тариф.
-                                formedres.id_location_place = ChoosePlace;
-                                mp.Entry(formedres).State = EntityState.Modified;
-                                mp.SaveChanges();
+                                formedres.Edit(formedres, ChoosePlace);
                                 return RedirectToAction("Agreement", new { Controller = "Res" });
                             }
-
-                        }
-                        else
-                        {
-                            ViewData["ReservationPlace"] = "Активирование брони без наличия ТС запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после добавления вашего ТС!";
-                            formedres.id_location_place = ChoosePlace;
-                            mp.Entry(formedres).State = EntityState.Modified;
-                            mp.SaveChanges();
-                            return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
-                        }
                     }
                     else
                     {
@@ -255,17 +259,16 @@ namespace ParkgMVC.Controllers
                             if (us != null)
                             {
                                 formedres.id_location_place = ChoosePlace;
+                                formedres.id_alternative_location_place = ChoosePlace;
                                 formedres.Status = "Formed";
-                                formedres.DateConnection = "Reservation formed and wait connect";
+                                formedres.Description = "Reservation formed and wait connect";
                                 mp.Entry(formedres).State = EntityState.Modified;
                                 mp.SaveChanges();
                             }
                         }
                         else
                         {
-                            formedres.id_location_place = ChoosePlace;
-                            mp.Entry(formedres).State = EntityState.Modified;
-                            mp.SaveChanges();
+                            formedres.Edit(formedres, ChoosePlace);
                         }
                     }
                     else

@@ -11,7 +11,7 @@
 <script src="/Scripts/MicrosoftAjax.js" type="text/javascript"></script>
 <script src="/Scripts/MicrosoftMvcValidation.js" type="text/javascript"></script>
 <% Html.EnableClientValidation(); %>
-
+    <h1 style="color:#FF0000"><%: ViewData["Code"] %></h1>
 <% using (Html.BeginForm()) {%>
         <%: Html.ValidationSummary(true) %>
 

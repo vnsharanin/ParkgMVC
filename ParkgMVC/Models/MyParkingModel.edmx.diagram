@@ -4,21 +4,21 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="3e930870319f433aaaf7eda991776526" Name="Diagram1">
+      <Diagram DiagramId="da9649a59552450182031fd1f324631a" Name="Diagram1">
         <EntityTypeShape EntityType="MyParkingModel2.balance" Width="1.5" PointX="3" PointY="7.125" IsExpanded="true" />
         <EntityTypeShape EntityType="MyParkingModel2.levelzone" Width="1.5" PointX="1.5" PointY="3.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MyParkingModel2.parkingzone" Width="1.5" PointX="1.5" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="MyParkingModel2.place" Width="1.5" PointX="3.75" PointY="2.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="MyParkingModel2.reservation" Width="1.5" PointX="6" PointY="8.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="MyParkingModel2.place" Width="1.5" PointX="3.75" PointY="2.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MyParkingModel2.reservation" Width="1.5" PointX="6" PointY="8.375" IsExpanded="true" />
         <EntityTypeShape EntityType="MyParkingModel2.reservation_tariff" Width="1.5" PointX="3.75" PointY="19.125" IsExpanded="true" />
         <EntityTypeShape EntityType="MyParkingModel2.tariffonabonementforvisit" Width="1.5" PointX="0.75" PointY="13.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="MyParkingModel2.tariffonplace" Width="1.5" PointX="1.5" PointY="20.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="MyParkingModel2.ts" Width="1.5" PointX="3" PointY="14.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="MyParkingModel2.type_parking" Width="1.5" PointX="1.5" PointY="17.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="MyParkingModel2.tariffonplace" Width="1.5" PointX="1.5" PointY="21.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="MyParkingModel2.ts" Width="1.5" PointX="3" PointY="14.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="MyParkingModel2.type_parking" Width="1.5" PointX="1.5" PointY="18.875" IsExpanded="true" />
         <EntityTypeShape EntityType="MyParkingModel2.usingtariffonabonementforvisit" Width="1.5" PointX="3" PointY="10.875" IsExpanded="true" />
         <EntityTypeShape EntityType="MyParkingModel2.usr" Width="1.5" PointX="0.75" PointY="8.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="MyParkingModel2.visit" Width="1.5" PointX="5.25" PointY="14.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="MyParkingModel2.visitparameters" Width="1.5" PointX="3" PointY="23.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="MyParkingModel2.visit" Width="1.5" PointX="5.25" PointY="14.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MyParkingModel2.visitparameters" Width="1.5" PointX="3" PointY="25.25" IsExpanded="true" />
         <AssociationConnector Association="MyParkingModel2.balance_ibfk_1" ManuallyRouted="false" />
         <AssociationConnector Association="MyParkingModel2.levelzone_ibfk_1" ManuallyRouted="false" />
         <AssociationConnector Association="MyParkingModel2.place_ibfk_1" ManuallyRouted="false" />

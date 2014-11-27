@@ -6,8 +6,8 @@
     </Key>
     <Property Name="operation_id" Type="uint" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Type_Operation" Type="char" MaxLength="255" Nullable="false" />
-    <Property Name="Sum" Type="decimal" Precision="10" Scale="0" Nullable="false" />
-    <Property Name="BalanceAfterOperation" Type="decimal" Precision="10" Scale="0" Nullable="false" />
+    <Property Name="Sum" Type="decimal" Precision="65" Scale="30" Nullable="false" />
+    <Property Name="BalanceAfterOperation" Type="decimal" Precision="65" Scale="30" Nullable="false" />
     <Property Name="Login" Type="char" MaxLength="255" Nullable="false" />
     <Property Name="Description" Type="char" MaxLength="255" />
     <Property Name="DateOperation" Type="char" MaxLength="255" Nullable="false" />
@@ -39,6 +39,7 @@
     <Property Name="NumberPlace" Type="int" Nullable="false" />
     <Property Name="Status" Type="char" MaxLength="255" Nullable="false" />
     <Property Name="id_tariff_on_place" Type="uint" Nullable="false" />
+    <Property Name="id_alternative_tariff_on_place" Type="int" />
   </EntityType>
   <EntityType Name="reservation">
     <Key>
@@ -49,9 +50,11 @@
     <Property Name="Login" Type="char" MaxLength="255" Nullable="false" />
     <Property Name="DateConnection" Type="char" MaxLength="255" />
     <Property Name="id_location_place" Type="uint" />
+    <Property Name="id_alternative_location_place" Type="int" />
     <Property Name="Status" Type="char" MaxLength="255" Nullable="false" />
     <Property Name="DateOutFromActivity" Type="char" MaxLength="255" />
     <Property Name="ApproximatelyDateOutFromActivity" Type="char" MaxLength="255" />
+    <Property Name="Description" Type="char" MaxLength="255" />
   </EntityType>
   <EntityType Name="reservation_tariff">
     <Key>
@@ -121,7 +124,7 @@
     <Property Name="Login" Type="char" MaxLength="255" Nullable="false" />
     <Property Name="FIO" Type="char" MaxLength="255" />
     <Property Name="Num_Card_Driver" Type="int" />
-    <Property Name="Now_Balance" Type="decimal" Precision="10" Scale="0" />
+    <Property Name="Now_Balance" Type="decimal" Precision="65" Scale="30" />
   </EntityType>
   <EntityType Name="visit">
     <Key>

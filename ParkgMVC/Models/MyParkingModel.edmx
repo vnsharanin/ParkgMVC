@@ -11,8 +11,8 @@
           </Key>
           <Property Name="operation_id" Type="uint" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Type_Operation" Type="char" MaxLength="255" Nullable="false" />
-          <Property Name="Sum" Type="decimal" Precision="10" Scale="0" Nullable="false" />
-          <Property Name="BalanceAfterOperation" Type="decimal" Precision="10" Scale="0" Nullable="false" />
+          <Property Name="Sum" Type="decimal" Precision="65" Scale="30" Nullable="false" />
+          <Property Name="BalanceAfterOperation" Type="decimal" Precision="65" Scale="30" Nullable="false" />
           <Property Name="Login" Type="char" MaxLength="255" Nullable="false" />
           <Property Name="Description" Type="char" MaxLength="255" />
           <Property Name="DateOperation" Type="char" MaxLength="255" Nullable="false" />
@@ -44,6 +44,7 @@
           <Property Name="NumberPlace" Type="int" Nullable="false" />
           <Property Name="Status" Type="char" MaxLength="255" Nullable="false" />
           <Property Name="id_tariff_on_place" Type="uint" Nullable="false" />
+          <Property Name="id_alternative_tariff_on_place" Type="int" />
         </EntityType>
         <EntityType Name="reservation">
           <Key>
@@ -54,9 +55,11 @@
           <Property Name="Login" Type="char" MaxLength="255" Nullable="false" />
           <Property Name="DateConnection" Type="char" MaxLength="255" />
           <Property Name="id_location_place" Type="uint" />
+          <Property Name="id_alternative_location_place" Type="int" />
           <Property Name="Status" Type="char" MaxLength="255" Nullable="false" />
           <Property Name="DateOutFromActivity" Type="char" MaxLength="255" />
           <Property Name="ApproximatelyDateOutFromActivity" Type="char" MaxLength="255" />
+          <Property Name="Description" Type="char" MaxLength="255" />
         </EntityType>
         <EntityType Name="reservation_tariff">
           <Key>
@@ -126,7 +129,7 @@
           <Property Name="Login" Type="char" MaxLength="255" Nullable="false" />
           <Property Name="FIO" Type="char" MaxLength="255" />
           <Property Name="Num_Card_Driver" Type="int" />
-          <Property Name="Now_Balance" Type="decimal" Precision="10" Scale="0" />
+          <Property Name="Now_Balance" Type="decimal" Precision="65" Scale="30" />
         </EntityType>
         <EntityType Name="visit">
           <Key>
@@ -440,6 +443,7 @@
           <Property Name="NumberPlace" Type="Int32" Nullable="false" />
           <Property Name="Status" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="id_tariff_on_place" Type="Int64" Nullable="false" />
+          <Property Name="id_alternative_tariff_on_place" Type="Int32" />
           <NavigationProperty Name="levelzone" Relationship="Self.place_ibfk_1" FromRole="place" ToRole="levelzone" />
           <NavigationProperty Name="tariffonplace" Relationship="Self.place_ibfk_2" FromRole="place" ToRole="tariffonplace" />
           <NavigationProperty Name="reservation" Relationship="Self.reservation_ibfk_3" FromRole="place" ToRole="reservation" />
@@ -454,9 +458,11 @@
           <Property Name="Login" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="DateConnection" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="id_location_place" Type="Int64" />
+          <Property Name="id_alternative_location_place" Type="Int32" />
           <Property Name="Status" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="DateOutFromActivity" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="ApproximatelyDateOutFromActivity" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="place" Relationship="Self.reservation_ibfk_3" FromRole="reservation" ToRole="place" />
           <NavigationProperty Name="reservation_tariff" Relationship="Self.reservation_ibfk_1" FromRole="reservation" ToRole="reservation_tariff" />
           <NavigationProperty Name="usr" Relationship="Self.reservation_ibfk_2" FromRole="reservation" ToRole="usr" />
@@ -857,6 +863,7 @@
                 <ScalarProperty Name="NumberPlace" ColumnName="NumberPlace" />
                 <ScalarProperty Name="Status" ColumnName="Status" />
                 <ScalarProperty Name="id_tariff_on_place" ColumnName="id_tariff_on_place" />
+                <ScalarProperty Name="id_alternative_tariff_on_place" ColumnName="id_alternative_tariff_on_place" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -868,9 +875,11 @@
                 <ScalarProperty Name="Login" ColumnName="Login" />
                 <ScalarProperty Name="DateConnection" ColumnName="DateConnection" />
                 <ScalarProperty Name="id_location_place" ColumnName="id_location_place" />
+                <ScalarProperty Name="id_alternative_location_place" ColumnName="id_alternative_location_place" />
                 <ScalarProperty Name="Status" ColumnName="Status" />
                 <ScalarProperty Name="DateOutFromActivity" ColumnName="DateOutFromActivity" />
                 <ScalarProperty Name="ApproximatelyDateOutFromActivity" ColumnName="ApproximatelyDateOutFromActivity" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

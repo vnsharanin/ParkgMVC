@@ -23,15 +23,17 @@ namespace ParkgMVC.Models
         public long id_reservation_user { get; set; }
         public long id_Reservation_Tariff { get; set; }
         public Nullable<long> id_location_place { get; set; }
+        public Nullable<int> id_alternative_location_place { get; set; }
         public string ApproximatelyDateOutFromActivity { get; set; }
-    
+        public string Description { get; set; }
+
         public virtual place place { get; set; }
         public virtual reservation_tariff reservation_tariff { get; set; }
         public virtual usr usr { get; set; }
 
         MyParkingEntities mp = new MyParkingEntities();
 
-        public bool CreateReservation(string st, string Log, int Id_loc_place, string Date, reservation_tariff tar)
+        public bool CreateReservation(string Describe, string Log, reservation_tariff tar)
         {
             bool Result = false;
             try
@@ -39,20 +41,8 @@ namespace ParkgMVC.Models
                 reservation r = new reservation();
                 r.id_Reservation_Tariff = tar.id_Reservation_Tariff;
                 r.Login = Log;
-                r.DateConnection = Date;
-                if (Id_loc_place != 0)
-                {
-                    r.id_location_place = Id_loc_place;
-                }
-                r.Status = st;
-                if (st != "Formed")
-                {
-                    DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
-                    r.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
-
-                    place exemp = new place();
-                    exemp.ChangeStatus("In waiting visit", Id_loc_place);
-                }
+                r.Status = "Formed";
+                r.Description = Describe;
                 mp.reservation.Add(r);
                 mp.SaveChanges();
                 Result = true;
@@ -64,7 +54,16 @@ namespace ParkgMVC.Models
             return Result;
         }
 
-        public bool Revoke(string st, reservation obj, string Date)
+
+        public void Edit(reservation formedres, Int32 id_loc_place)
+        {
+            formedres.id_location_place = id_loc_place;
+            formedres.id_alternative_location_place = id_loc_place;
+            mp.Entry(formedres).State = EntityState.Modified;
+            mp.SaveChanges();
+        }
+
+        public bool Revoke(string Describe, reservation obj, string Date)
         {
             bool result = false;
             try
@@ -72,13 +71,13 @@ namespace ParkgMVC.Models
                 //format my date have view:  string d = "21.11.14 20:00";
                 long span = 0;
                 place exemp = new place();
-                if (st == "Reservation expired" | st == "Revoke")
+                if (Describe == "Reservation was expired" | Describe == "Reservation was revoke")
                 {
                     span = Convert.ToDateTime(Date).Ticks - Convert.ToDateTime(obj.DateConnection).Ticks;
                     //Перевод места в Free состояние
                     exemp.ChangeStatus("Free", (long)obj.id_location_place);
                 }
-                else if (st == "Visited")
+                else if (Describe == "Reservation was used")
                 {
                     DateTime mydate = Convert.ToDateTime(obj.DateConnection).AddMinutes(obj.reservation_tariff.FirstFreeTimeInMinutes);
                     span = Convert.ToDateTime(Date).Ticks - mydate.Ticks;
@@ -94,7 +93,7 @@ namespace ParkgMVC.Models
                 //Да и еще, расчеты делаются точно. Но не округлить ли баланс на выходе в лучшую сторону для автомобилиста, до копейки(сотых) хотя бы.
 
                     balance bl = new balance();
-                    bl.Operation("Debit", price, (decimal)ur.Now_Balance, ur.Login, st, Date);
+                    bl.Operation("Debit", price, (decimal)ur.Now_Balance, ur.Login, Describe, Date);
 
                 result = true;
             }
@@ -114,13 +113,14 @@ namespace ParkgMVC.Models
                 if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
                 {
                     n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
-                    n.Status = "Expired";
+                    n.Status = "Closed";
+                    n.Description = "Reservation was expired";
                     mp.Entry(n).State = EntityState.Modified;
                     mp.SaveChanges();
                     //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
                     //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
                     reservation r = new reservation();
-                    r.Revoke("Reservation expired", n, n.ApproximatelyDateOutFromActivity);
+                    r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
                     //рассчитать средства и списать их со счета.
                     break;
                 }

@@ -67,6 +67,7 @@
 			<th rowspan="3" style="text-align: center;">Предположительная дата выхода из активности</th>
 			<th rowspan="3" style="text-align: center;">Итоговая дата выхода из активности</th>
 			<th rowspan="3" style="text-align: center;">Статус брони</th>
+            			<th rowspan="3" style="text-align: center;">Описание</th>
 		</tr>
 		<tr>
 			<th rowspan="2" style="text-align: center;">Зона</th>
@@ -123,6 +124,9 @@
             </td>
             <td>
                 <%: item.Status%>
+            </td>
+             <td>
+                <%: item.Description%>
             </td>
         </tr>
     

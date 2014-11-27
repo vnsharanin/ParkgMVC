@@ -52,12 +52,11 @@ namespace ParkgMVC.Models
         MyParkingEntities mp = new MyParkingEntities();
 
 
-        public bool CreateTS(ts t, string Log)
+        public string CreateTS(ts t, string Log)
         {
-            bool result = true;
+            string result = "";
             try
             {
-                //Проблема в следующий двух строках после этого сообщения из-за них ничего не делает
                 ts ExistForThisLogFalse = mp.ts.Where(x => x.Number == t.Number & x.Company == t.Company & x.Mode == t.Mode & x.Login == Log & x.Status == "False").FirstOrDefault();
                 ts ExistTS = mp.ts.Where(x => x.Number == t.Number & x.Status == "True").FirstOrDefault();
                 bool exist = true;
@@ -72,14 +71,14 @@ namespace ParkgMVC.Models
                         mp.Entry(ExistForThisLogFalse).State = EntityState.Modified;
                             mp.SaveChanges();
                             exist = false;
-                        result = true;
+                        result = "1";
                     }
                  
                 if (exist == true)
                 {
                         if (ExistTS != null)
                         {
-                            result = false;
+                            result = "Указанный регистрационный номер существует и активен в системе";
                             //это тс в базе и кем-то используется
                         }
                         else if (ExistTS == null)
@@ -89,25 +88,25 @@ namespace ParkgMVC.Models
                             t.Status = "True";
                             mp.ts.Add(t);
                             mp.SaveChanges();
-                            result = true;
+                            result = "1";
                         }
                     }
 
             }
-            catch
+            catch (Exception ex)
             {
-                result = false;
+                result = ex.Message;
             }
                 return result;
         }
 
-        public bool ChangeStatus(Int32 id, string Log)
+        public string ChangeStatus(Int32 id, string Log)
         {
-            bool result = true;
+            string result = "";
             try
             {
                 var ts = mp.ts.Where(x => x.id_ts == id & x.Login == Log).ToList();
-                var listts = mp.ts.Where(x => x.Login == Log).ToList();
+                var listts = mp.ts.Where(x => x.Login == Log & x.Status == "True").ToList();
                 int i = 0;
                 foreach (ts n in listts)
                 {
@@ -123,16 +122,16 @@ namespace ParkgMVC.Models
                         mp.SaveChanges();
                         break;
                     }
-                    result = true;
+                    result = "1";
                 }
                 else if (exist != null & i == 1)
                 {
-                    result = false;
+                    result = "По правилам системы, имея в наличии одно ТС и активную бронь удаление ТС строго запрещено.";
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                result = false;
+                result = ex.Message;
             }
             return result;
         }
