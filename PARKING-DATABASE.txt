@@ -151,6 +151,7 @@ CREATE TABLE Place
 	NumberPlace int(11) not null default 1,
 	Status char(255) not null default 'Free',
 	id_tariff_on_place int(11) unsigned not null,
+	id_alternative_tariff_on_place int(11) null,
 	FOREIGN KEY(id_location_level) REFERENCES LevelZone(id_location_level),
 	FOREIGN KEY(id_tariff_on_place) REFERENCES TariffOnPlace(id_tariff_on_place),
 	PRIMARY KEY(id_location_place)
@@ -169,7 +170,8 @@ CREATE TABLE Reservation_Tariff
 INSERT INTO Reservation_Tariff (FirstFreeTimeInMinutes,PriceInRubForHourHightFreeTime,Status,ValidityPeriodFromTheTimeOfActivationInHour)
 values (15,5,'available',2);
 
-#Status may be: 1)Expired 2)Visited 3)In waiting visit 4)Revoke 5) Formed
+#Status may be: 1)Reservation was expired 2)was used 3)in waiting visit 4)was revoke 5) formed
+#Status may be: 1)Active 2)Closed 3)Formed
 CREATE TABLE Reservation
 (
 	id_reservation_user int(11) unsigned not null auto_increment,
@@ -177,9 +179,11 @@ CREATE TABLE Reservation
 	Login char(255) not null default '',
 	DateConnection char(255) null,
 	id_location_place int(11) unsigned null,
+	id_alternative_location_place int(11) null,
 	Status char(255) not null default 'Formed',
 	DateOutFromActivity char(255) null,
 	ApproximatelyDateOutFromActivity char(255) null,
+	Description char(255) null,
 	FOREIGN KEY(id_Reservation_Tariff) REFERENCES Reservation_Tariff(id_Reservation_Tariff),
 	FOREIGN KEY(Login) REFERENCES USR(Login),
 	FOREIGN KEY(id_location_place) REFERENCES Place(id_location_place),

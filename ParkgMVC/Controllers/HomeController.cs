@@ -104,7 +104,7 @@ namespace ParkgMVC.Controllers
         public ActionResult Continue_place(Int32 id_location_level, string Value)
         {
             reservation find = new reservation();
-            find.FindOnExpired();
+            find.FindOnExpired("");
             levelzone levz = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
             Int32 zone = levz.Parking_zone;
             Int32 level = levz.Level;
@@ -129,14 +129,14 @@ namespace ParkgMVC.Controllers
         public ActionResult ConnectReservation(Int32 ChoosePlace, Int32 id_location_level, FormCollection form)
         {
             reservation find = new reservation();
-            find.FindOnExpired();
+            find.FindOnExpired("");
             levelzone levz = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
             Int32 zone = levz.Parking_zone;
             Int32 level = levz.Level;
             string type_level = levz.TypeLevel;
             ViewData["Zone-Level"] = "Зона №" + Convert.ToString(zone) + " ; Уровень:" + Convert.ToString(level) + " ; Тип уровня: " + type_level;
             ViewData["Reservation"] = "RESERVATION";
-                                       
+
             if (User.Identity.IsAuthenticated)
             {
                 string Log = User.Identity.Name.ToString();
@@ -150,69 +150,85 @@ namespace ParkgMVC.Controllers
                     if (formedres != null)
                     {
 
-                            reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
-                            if (tar != null)
+
+
+                        usr us = mp.usr.Where(x => x.Login == Log).FirstOrDefault();
+                        place free = mp.place.Where(x => x.id_location_place == ChoosePlace & x.Status == "Free").FirstOrDefault();
+                        if (us != null & free != null)
+                        {
+                            if (us.Now_Balance >= 0)
                             {
-
-                                usr us = mp.usr.Where(x => x.Login == Log).FirstOrDefault();
-                                place free = mp.place.Where(x => x.id_location_place == ChoosePlace & x.Status == "Free").FirstOrDefault();
-                                if (us != null & free != null)
+                                ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
+                                if (exist != null)
                                 {
-                                    if (us.Now_Balance >= 0)
-                                    {
-                                        ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
-                                        if (exist != null)
-                                        {
-                                            //tariffOnplace p = mp.tariff_on_place.where(x=>x.id_tariff_on_place == tariff & x.Status == "Active")
-                                            //if p != null
-                                            formedres.id_location_place = ChoosePlace;
-                                            formedres.id_alternative_location_place = ChoosePlace;
-                                            formedres.Status = "Active";
-                                            formedres.Description = "Reservation connect";
-                                            formedres.DateConnection = Date;
-                                            DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
-                                            formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
-                                            mp.Entry(formedres).State = EntityState.Modified;
-                                            mp.SaveChanges();
-                                            place newplace = new place();
-                                            newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
 
-                                            //else p==null return сообщение что тариф для места изменился, отсылаю через вбю дата актуальные тарифы и места с актуальными тарифами
-                                            //Подумать стоит ли делать это(комментированный примерный код) в ResController при подключении брони
-                                        }
-                                        else
-                                        {
-                                            ViewData["ReservationPlace"] = "Активирование брони без наличия ТС запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после добавления вашего ТС!";
-                                            formedres.Edit(formedres, ChoosePlace);
-                                            return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
-                                        }
+                                    reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
+                                    if (tar != null)
+                                    {
+
+                                        //tariffOnplace p = mp.tariff_on_place.where(x=>x.id_tariff_on_place == tariff & x.Status == "Active")
+                                        //if p != null
+                                        formedres.id_location_place = ChoosePlace;
+                                        formedres.id_alternative_location_place = ChoosePlace;
+                                        formedres.Status = "Active";
+                                        formedres.Description = "Reservation connect";
+                                        formedres.DateConnection = Date;
+                                        DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
+                                        formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
+                                        mp.Entry(formedres).State = EntityState.Modified;
+                                        mp.SaveChanges();
+                                        place newplace = new place();
+                                        newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
+
+                                        //else p==null return сообщение что тариф для места изменился, отсылаю через вбю дата актуальные тарифы и места с актуальными тарифами
+                                        //Подумать стоит ли делать это(комментированный примерный код) в ResController при подключении брони
                                     }
-                                    else if (us.Now_Balance < 0)
+                                    else
                                     {
-                                        ViewData["ReservationPlace"] = "Активирование брони с отрицательным балансом запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после пополнения баланса!";
-                                        formedres.Edit(formedres, ChoosePlace);
-
-                                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                                        //У формируемой брони изменился тариф.
+                                        formedres.id_location_place = ChoosePlace;
+                                        formedres.id_alternative_location_place = ChoosePlace;
+                                        mp.Entry(formedres).State = EntityState.Modified;
+                                        mp.SaveChanges();
+                                        return RedirectToAction("Agreement", new { Controller = "Res" });
                                     }
 
+
                                 }
-                                else if (free == null)
+                                else
                                 {
-                                    ViewData["ReservationPlace"] = "Место №" + free.NumberPlace + " занято!";
-                                     return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                                    ViewData["ReservationPlace"] = "Активирование брони без наличия ТС запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после добавления вашего ТС!";
+                                    formedres.id_location_place = ChoosePlace;
+                                    formedres.id_alternative_location_place = ChoosePlace;
+                                    mp.Entry(formedres).State = EntityState.Modified;
+                                    mp.SaveChanges();
+                                    return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
                                 }
                             }
-                            else
+                            else if (us.Now_Balance < 0)
                             {
-                                //У формируемой брони изменился тариф.
-                                formedres.Edit(formedres, ChoosePlace);
-                                return RedirectToAction("Agreement", new { Controller = "Res" });
+                                ViewData["ReservationPlace"] = "Активирование брони с отрицательным балансом запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после пополнения баланса!";
+                                formedres.id_location_place = ChoosePlace;
+                                formedres.id_alternative_location_place = ChoosePlace;
+                                mp.Entry(formedres).State = EntityState.Modified;
+                                mp.SaveChanges();
+
+                                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
                             }
+
+                        }
+                        else if (free == null)
+                        {
+                            ViewData["ReservationPlace"] = "Место №" + free.NumberPlace + " занято!";
+                            return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                        }
+
+
                     }
                     else
                     {
                         ViewData["ReservationPlace"] = "Система не нашла формирующейся заявки! Возможно, она была удалена вами.";
-                       return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
                     }
                 }
 
@@ -268,7 +284,10 @@ namespace ParkgMVC.Controllers
                         }
                         else
                         {
-                            formedres.Edit(formedres, ChoosePlace);
+                            formedres.id_location_place = ChoosePlace;
+                            formedres.id_alternative_location_place = ChoosePlace;
+                            mp.Entry(formedres).State = EntityState.Modified;
+                            mp.SaveChanges();
                         }
                     }
                     else
@@ -293,7 +312,7 @@ namespace ParkgMVC.Controllers
             }
         }
 
-
+        
 
         /*
 

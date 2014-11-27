@@ -54,7 +54,7 @@ namespace ParkgMVC.Models
             return Result;
         }
 
-
+        //не заработал. оставлю для алгоритма экстренной смены статуса места при забронированном состоянии
         public void Edit(reservation formedres, Int32 id_loc_place)
         {
             formedres.id_location_place = id_loc_place;
@@ -104,28 +104,59 @@ namespace ParkgMVC.Models
             return result;
         }
 
-        public bool FindOnExpired()
+        public bool FindOnExpired(string Log)
         {
-            foreach (reservation n in mp.reservation.Where(x=>x.Status == "Active").ToList())
+            if (Log != "")
             {
-                string Date = DateTime.Now.ToString("dd.MM.yy HH:mm");
-                //Проверяю истекла ли дата брони
-                if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
+                bool Result = false;
+                foreach (reservation n in mp.reservation.Where(x => x.Login == Log & x.Status == "Active").ToList())
                 {
-                    n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
-                    n.Status = "Closed";
-                    n.Description = "Reservation was expired";
-                    mp.Entry(n).State = EntityState.Modified;
-                    mp.SaveChanges();
-                    //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
-                    //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
-                    reservation r = new reservation();
-                    r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
-                    //рассчитать средства и списать их со счета.
-                    break;
+                string Date = DateTime.Now.ToString("dd.MM.yy HH:mm");
+                    //Проверяю истекла ли дата брони
+                    if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
+                    {
+                        n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
+                        n.Status = "Closed";
+                        n.Description = "Reservation was expired";
+                        mp.Entry(n).State = EntityState.Modified;
+                        mp.SaveChanges();
+                        //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
+                        //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
+                        reservation r = new reservation();
+                        r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
+                        //рассчитать средства и списать их со счета.
+                        Result = true;
+                        break;
+                    }
                 }
+                return Result;
             }
-            return true;
+            else
+            {
+
+                foreach (reservation n in mp.reservation.Where(x => x.Status == "Active").ToList())
+                {
+                    string Date = DateTime.Now.ToString("dd.MM.yy HH:mm");
+                    //Проверяю истекла ли дата брони
+                    if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
+                    {
+                        n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
+                        n.Status = "Closed";
+                        n.Description = "Reservation was expired";
+                        mp.Entry(n).State = EntityState.Modified;
+                        mp.SaveChanges();
+                        //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
+                        //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
+                        reservation r = new reservation();
+                        r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
+                        //рассчитать средства и списать их со счета.
+                        break;
+                    }
+                }
+                return true;
+            }
+
+
         }
 
     }

@@ -78,26 +78,34 @@ namespace ParkgMVC.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                reservation_tariff check = mp.reservation_tariff.Where(x => x.Status == "available").FirstOrDefault();
+                //reservation_tariff check = mp.reservation_tariff.Where(x => x.Status == "available").FirstOrDefault();
                 
                         string Log = User.Identity.Name.ToString();
                         reservation activeres = mp.reservation.Where(x => x.Login == Log & x.Status == "Active").FirstOrDefault();
-                        reservation formed = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
                         if (activeres == null)
                         {
-                            if (formed == null)
-                            {
-                                reservation r = new reservation();
-                                r.CreateReservation("Reservation wait full formed", Log, check);
-                            }
-                            else if (formed != null)
-                            {
-                                formed.id_Reservation_Tariff = id_Reservation_Tariff;
-                                mp.Entry(formed).State = EntityState.Modified;
-                                mp.SaveChanges();
-                                return RedirectToAction("Reservation");
-                            }
-
+                                            reservation_tariff check = mp.reservation_tariff.Where(x => x.id_Reservation_Tariff == id_Reservation_Tariff & x.Status == "available").FirstOrDefault();
+                                            if (check != null)
+                                            {
+                                                reservation formed = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
+                                                if (formed == null)
+                                                {
+                                                    reservation r = new reservation();
+                                                    r.CreateReservation("Reservation wait full formed", Log, check);
+                                                }
+                                                else if (formed != null)
+                                                {
+                                                    formed.id_Reservation_Tariff = id_Reservation_Tariff;
+                                                    mp.Entry(formed).State = EntityState.Modified;
+                                                    mp.SaveChanges();
+                                                    return RedirectToAction("Reservation");
+                                                }
+                                            }
+                                            else if (check == null)
+                                            {
+                                                ViewData["NewTariff"] = "Ранее подтвержденный Вами на использование тариф закончил свое действие, пожалуйста, ознакомьтесь с условиями для нового тарифа";
+                                                return View(mp.reservation_tariff.Where(x => x.Status == "available").ToList());
+                                            }
                         }
                         else if (activeres != null)
                         {
@@ -119,66 +127,69 @@ namespace ParkgMVC.Controllers
         public ActionResult Connect()
         {
             reservation find = new reservation();
-            find.FindOnExpired();
+            find.FindOnExpired("");
             if (User.Identity.IsAuthenticated)
             {
                 string Log = User.Identity.Name.ToString();
                 string Date = DateTime.Now.ToString("dd.MM.yy HH:mm");
                 reservation formedres = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
 
-                        reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
-                        if (tar != null)
+
+
+                usr us = mp.usr.Where(x => x.Login == Log).FirstOrDefault();
+                if (formedres.id_location_place != null)
+                {
+                    place free = mp.place.Where(x => x.id_location_place == formedres.id_location_place & x.Status == "Free").FirstOrDefault();
+                    if (us != null & free != null)
+                    {
+                        if (us.Now_Balance >= 0)
                         {
-
-                            usr us = mp.usr.Where(x => x.Login == Log).FirstOrDefault();
-                            if (formedres.id_location_place != null)
+                            ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
+                            if (exist != null)
                             {
-                                place free = mp.place.Where(x => x.id_location_place == formedres.id_location_place & x.Status == "Free").FirstOrDefault();
-                                if (us != null & free != null)
-                                {
-                                    if (us.Now_Balance >= 0)
-                                    {
-                                        ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
-                                        if (exist != null)
-                                        {
-                                            formedres.Status = "Active";
-                                            formedres.Description = "Reservation connect";
-                                            formedres.DateConnection = Date;
-                                            DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
-                                            formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
-                                            mp.Entry(formedres).State = EntityState.Modified;
-                                            mp.SaveChanges();
-                                            place newplace = new place();
-                                            newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
-                                        }
-                                        else
-                                        {
-                                            ViewData["AnswerFromReservation"] = "Активирование бронирования без наличия ТС запрещено!";
-                                        }
-                                    }
-                                    else if (us.Now_Balance < 0)
-                                    {
-                                        ViewData["AnswerFromReservation"] = "У Вас отрицательный баланс, активирование бронирования запрещено!";
-                                    }
-                                }
 
-                                else if (free == null)
+                                reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
+                                if (tar != null)
                                 {
-                                    ViewData["AnswerFromReservation"] = "Месторасположение занято!";
+                                    formedres.Status = "Active";
+                                    formedres.Description = "Reservation connect";
+                                    formedres.DateConnection = Date;
+                                    DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
+                                    formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
+                                    mp.Entry(formedres).State = EntityState.Modified;
+                                    mp.SaveChanges();
+                                    place newplace = new place();
+                                    newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
+                                }
+                                else
+                                {
+                                    ViewData["AnswerFromReservation"] = "Данный тариф бронирования не активен. Пожалуйста, переформируйте заявку!";
                                 }
                             }
-                            else if (formedres.id_location_place == null)
+                            else
                             {
-                                ViewData["AnswerFromReservation"] = "Месторасположение не задано!";
+                                ViewData["AnswerFromReservation"] = "Активирование бронирования без наличия ТС запрещено!";
                             }
                         }
-                        else
+                        else if (us.Now_Balance < 0)
                         {
-                            ViewData["AnswerFromReservation"] = "Данный тариф бронирования не активен. Пожалуйста, переформируйте заявку!";
+                            ViewData["AnswerFromReservation"] = "У Вас отрицательный баланс, активирование бронирования запрещено!";
                         }
+                    }
+
+                    else if (free == null)
+                    {
+                        ViewData["AnswerFromReservation"] = "Месторасположение занято!";
+                    }
+                }
+                else if (formedres.id_location_place == null)
+                {
+                    ViewData["AnswerFromReservation"] = "Месторасположение не задано!";
+                }
 
 
-                
+
+
                 ViewData["ReservationTariff"] = mp.reservation_tariff.Where(x => x.Status == "available").ToList();
                 return View(mp.reservation.Where(x => x.Login == Log & (x.Status == "Formed" || x.Status == "Active")).ToList());
             }
@@ -201,32 +212,23 @@ namespace ParkgMVC.Controllers
                     reservation n = mp.reservation.Where(x => x.id_reservation_user == id_reservation_user).FirstOrDefault();
                     if (n.Status != "Formed")
                     {
-                        //Проверяю истекла ли дата брони
-                        if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
+                        reservation findforlog = new reservation();
+                        if (findforlog.FindOnExpired(Log) == false)
                         {
-                            n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
-                            n.Status = "Closed";
-                            n.Description = "Reservation was expired";
-                            mp.Entry(n).State = EntityState.Modified;
-                            mp.SaveChanges();
-                            //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
-                            //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
-                            r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
 
-                            //рассчитать средства и списать их со счета.
-                        }
-                        else if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) >= Convert.ToDateTime(Date))
-                        {
-                            n.DateOutFromActivity = Date;
-                            n.Status = "Closed";
-                            n.Description = "Reservation was revoke";
-                            mp.Entry(n).State = EntityState.Modified;
-                            mp.SaveChanges();
-                            //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
-                            //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
-                            reservation n1 = mp.reservation.Where(x => x.id_reservation_user == id_reservation_user).FirstOrDefault();
-                            r.Revoke("Reservation was revoke", n1, Date);
-                            //рассчитать средства и списать их со счета.
+                            if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) >= Convert.ToDateTime(Date))
+                            {
+                                n.DateOutFromActivity = Date;
+                                n.Status = "Closed";
+                                n.Description = "Reservation was revoke";
+                                mp.Entry(n).State = EntityState.Modified;
+                                mp.SaveChanges();
+                                //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
+                                //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
+                                reservation n1 = mp.reservation.Where(x => x.id_reservation_user == id_reservation_user).FirstOrDefault();
+                                r.Revoke("Reservation was revoke", n1, Date);
+                                //рассчитать средства и списать их со счета.
+                            }
                         }
                     }
                     else if (n.Status == "Formed")
@@ -258,23 +260,8 @@ namespace ParkgMVC.Controllers
             {
                 string Date = DateTime.Now.ToString("dd.MM.yy HH:mm");
                 string Log = User.Identity.Name.ToString();
-                foreach (reservation n in mp.reservation.Where(x => x.Login == Log & x.Status == "Active").ToList())
-                {
-                    //Проверяю истекла ли дата брони
-                    if (Convert.ToDateTime(n.ApproximatelyDateOutFromActivity) < Convert.ToDateTime(Date))
-                    {
-                        n.DateOutFromActivity = n.ApproximatelyDateOutFromActivity;
-                        n.Status = "Closed";
-                        n.Description = "Reservation was expired";
-                        mp.Entry(n).State = EntityState.Modified;
-                        mp.SaveChanges();
-                        //При посещении или отказе (и если бронь не истекла) в кач-ве третьего параметра отправить текущее время,
-                        //Здесь оа истекла и я отправляю предположительное, уже ранее рассчитанное при создании заявки брони.
-                        r.Revoke("Reservation was expired", n, n.ApproximatelyDateOutFromActivity);
-                        //рассчитать средства и списать их со счета.
-                        break;
-                    }
-                }
+                reservation findforlog = new reservation();
+                findforlog.FindOnExpired(Log);
                 ViewData["ReservationTariff"] = mp.reservation_tariff.Where(x => x.Status == "available").ToList();
                 return View(mp.reservation.Where(x => x.Login == Log & (x.Status == "Formed" || x.Status == "Active")).ToList());
             }
