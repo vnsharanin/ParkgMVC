@@ -6,6 +6,6 @@
 
 <asp:Content ID="errorContent" ContentPlaceHolderID="MainContent" runat="server">
     <h2>
-        Произошла ошибка при обработке вашего запроса.
+       Возникла непредвиденная ситуация, пожалуйста, обратитесь к администратору!
     </h2>
 </asp:Content>

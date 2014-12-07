@@ -47,13 +47,13 @@ values ('Seven',7,null,700,'available'),
 ('20700',null,20,700,'available');
 
 
-
+#Status: Expired, Revoke, Active
 CREATE TABLE UsingTariffOnAbonementForVisit
 (
 	id_abonement int(11) unsigned not null auto_increment,
 	Name_tariff_on_abonement char(255) not null,
 	DateConnection char(255) not null,
-	Status char(20) not null default 'Connection',
+	Status char(20) not null default 'Active',
 	NumOfVisitsMadeWithUsingThisTariff int(11) not null default 0,
 	Login char(255) not null default '',
 	DateOutFromActivity char(255) null,
@@ -144,6 +144,7 @@ values ('NO','Closed',12,0),
 ('YES','Closed',15,0);
 
 #Location = position
+#Status: Free , Occupied , Not working , Was replaced
 CREATE TABLE Place
 (
 	id_location_place int(11) unsigned not null auto_increment,

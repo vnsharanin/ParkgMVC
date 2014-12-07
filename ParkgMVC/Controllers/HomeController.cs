@@ -103,6 +103,7 @@ namespace ParkgMVC.Controllers
         [MultiButton(MatchFormKey = "Places", MatchFormValue = "Select_level")]
         public ActionResult Continue_place(Int32 id_location_level, string Value)
         {
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
             reservation find = new reservation();
             find.FindOnExpired("");
             levelzone levz = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
@@ -128,6 +129,7 @@ namespace ParkgMVC.Controllers
         [MultiButton(MatchFormKey = "Places", MatchFormValue = "ConnectReservation")]
         public ActionResult ConnectReservation(Int32 ChoosePlace, Int32 id_location_level, FormCollection form)
         {
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
             reservation find = new reservation();
             find.FindOnExpired("");
             levelzone levz = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
@@ -149,18 +151,20 @@ namespace ParkgMVC.Controllers
                     reservation formedres = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
                     if (formedres != null)
                     {
-
-
-
-                        usr us = mp.usr.Where(x => x.Login == Log).FirstOrDefault();
-                        place free = mp.place.Where(x => x.id_location_place == ChoosePlace & x.Status == "Free").FirstOrDefault();
-                        if (us != null & free != null)
-                        {
-                            if (us.Now_Balance >= 0)
-                            {
                                 ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
                                 if (exist != null)
                                 {
+
+                                    visit vis = mp.visit.Where(x => x.id_ts == exist.id_ts & x.DateOut == "dateout").FirstOrDefault();
+                                    if (vis == null)
+                                    {
+                        usr us = mp.usr.Where(x => x.Login == Log).FirstOrDefault();
+                        place free = mp.place.Where(x => x.id_location_place == ChoosePlace).FirstOrDefault();
+                        if (us != null & free.Status == "Free")
+                        {
+                            if (us.Now_Balance >= 0)
+                            {
+
 
                                     reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
                                     if (tar != null)
@@ -178,7 +182,7 @@ namespace ParkgMVC.Controllers
                                         mp.Entry(formedres).State = EntityState.Modified;
                                         mp.SaveChanges();
                                         place newplace = new place();
-                                        newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
+                                        newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place,0);
 
                                         //else p==null return сообщение что тариф для места изменился, отсылаю через вбю дата актуальные тарифы и места с актуальными тарифами
                                         //Подумать стоит ли делать это(комментированный примерный код) в ResController при подключении брони
@@ -194,16 +198,7 @@ namespace ParkgMVC.Controllers
                                     }
 
 
-                                }
-                                else
-                                {
-                                    ViewData["ReservationPlace"] = "Активирование брони без наличия ТС запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после добавления вашего ТС!";
-                                    formedres.id_location_place = ChoosePlace;
-                                    formedres.id_alternative_location_place = ChoosePlace;
-                                    mp.Entry(formedres).State = EntityState.Modified;
-                                    mp.SaveChanges();
-                                    return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
-                                }
+
                             }
                             else if (us.Now_Balance < 0)
                             {
@@ -217,19 +212,54 @@ namespace ParkgMVC.Controllers
                             }
 
                         }
-                        else if (free == null)
+                        else if (free.Status != "Free")
                         {
-                            ViewData["ReservationPlace"] = "Место №" + free.NumberPlace + " занято!";
+                            formedres.id_location_place = ChoosePlace;
+                            formedres.id_alternative_location_place = ChoosePlace;
+                            mp.Entry(formedres).State = EntityState.Modified;
+                            mp.SaveChanges();
+                            if (free.Status == "Occupied" || free.Status == "In waiting visit")
+                            {
+                                ViewData["ReservationPlace"] = "Место №" + free.NumberPlace + " занято!";
+                            }
+                            else
+                            {
+                                ViewData["ReservationPlace"] = "Место недоступно!";
+                            }
                             return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
                         }
-
-
+            }
+                else
+                {
+                    ViewData["ReservationPlace"] = "Формиремая бронь сохранена, но Вы не можете активировать бронирование, пока одно из ваших ТС находится у нас на парковке!";
+                                        formedres.id_location_place = ChoosePlace;
+                        formedres.id_alternative_location_place = ChoosePlace;
+                        mp.Entry(formedres).State = EntityState.Modified;
+                        mp.SaveChanges();
+                                    return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                   
+                                }
+                    }
+                    else
+                    {
+                        ViewData["ReservationPlace"] = "Активирование брони без наличия ТС запрещено. Формируемая вами бронь сохранена, вы сможете подключить ее после добавления вашего ТС!";
+                        formedres.id_location_place = ChoosePlace;
+                        formedres.id_alternative_location_place = ChoosePlace;
+                        mp.Entry(formedres).State = EntityState.Modified;
+                        mp.SaveChanges();
+                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                    }
                     }
                     else
                     {
                         ViewData["ReservationPlace"] = "Система не нашла формирующейся заявки! Возможно, она была удалена вами.";
                         return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
                     }
+
+
+
+
+
                 }
 
                 else if (activeres != null)
@@ -253,6 +283,7 @@ namespace ParkgMVC.Controllers
         [MultiButton(MatchFormKey = "Places", MatchFormValue = "SaveReservation")]
         public ActionResult SaveReservation(Int32 ChoosePlace, Int32 id_location_level, FormCollection form)
         {
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
             levelzone levz = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
             Int32 zone = levz.Parking_zone;
             Int32 level = levz.Level;

@@ -34,7 +34,6 @@ namespace ParkgMVC.Controllers
         {
             return View();
         }
-
         [HttpPost]
         public ActionResult LogOn(LogOnModel model, string returnUrl)
         {
@@ -104,7 +103,7 @@ namespace ParkgMVC.Controllers
                         return RedirectToAction("Index", "Home");
                     
                     }
-                    catch (Exception ex)
+                    catch //(Exception ex)
                     {
                     return View("Register");
                     }

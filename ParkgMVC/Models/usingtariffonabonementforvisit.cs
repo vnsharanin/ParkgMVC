@@ -11,14 +11,74 @@ namespace ParkgMVC.Models
 {
     using System;
     using System.Collections.Generic;
-    
+    using System.Linq;
+    using System.Web;
+    using System.Web.Mvc;
+    using ParkgMVC.Models;
+    using System.Data;
+    using System.Data.Entity;
+    using System.ComponentModel.DataAnnotations;
+
     public partial class usingtariffonabonementforvisit : ConnectedTariffPlan
     {
         public long id_abonement { get; set; }
         public string Name_tariff_on_abonement { get; set; }
         public int NumOfVisitsMadeWithUsingThisTariff { get; set; }
-    
+
         public virtual tariffonabonementforvisit tariffonabonementforvisit { get; set; }
         public virtual usr usr { get; set; }
+
+
+        MyParkingEntities mp = new MyParkingEntities();
+        public bool Connection(string Name_tariff, string Date, string Login)
+        {
+            bool Result = false;
+            try
+            {
+                usingtariffonabonementforvisit usingabtar = new usingtariffonabonementforvisit();
+                usingabtar.DateConnection = Date;
+                usingabtar.Login = Login;
+                usingabtar.Name_tariff_on_abonement = Name_tariff;
+                usingabtar.Status = "Active";
+                usingabtar.NumOfVisitsMadeWithUsingThisTariff = 0;
+                mp.usingtariffonabonementforvisit.Add(usingabtar);
+                mp.SaveChanges();
+                Result = true;
+            }
+            catch
+            {
+                Result = false;
+            }
+            return Result;
+        }
+        public bool ExpiredAbonement(string Login)
+        {
+            bool Result = true;
+            usingtariffonabonementforvisit usingabtar = mp.usingtariffonabonementforvisit.Where(x => x.Status == "Active" & x.Login == Login).FirstOrDefault();
+            if (usingabtar != null)
+            {
+                if (usingabtar.tariffonabonementforvisit.Num_days != null)
+                {
+                    string Date = DateTime.Now.ToString("dd.MM.yy HH:mm");
+                    DateTime mydate = Convert.ToDateTime(usingabtar.DateConnection).AddDays((int)usingabtar.tariffonabonementforvisit.Num_days);//Согласно активному тарифу
+                    if (mydate < Convert.ToDateTime(Date))
+                    {
+                        usingabtar.DateOutFromActivity = Convert.ToString(mydate);
+                        usingabtar.Status = "Expired";
+                        mp.Entry(usingabtar).State = EntityState.Modified;
+                        mp.SaveChanges();
+                        Result = true;
+                    }
+                    else if (mydate >= Convert.ToDateTime(Date))
+                    {
+                        Result = false;
+                    }
+                }
+                else Result = false;
+            }
+            else Result = false;
+            return Result;
+        }
+
     }
 }

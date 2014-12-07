@@ -10,7 +10,54 @@
         <h1 style="color:#FF0000"><%: ViewData["ReservationPlace"] %></h1>
     <fieldset>
 <h2>Список активных тарифов на места:</h2>
+        <table>
+        <tr>
+            <th>
+                Номер тарифа
+            </th>
+            <th>
+                Поддержка климат-контроля
+            </th>
+            <th>
+                Тип(открытый, крытый, полукрытый)
+            </th>
+            <th>
+                Цена за час без абонемента
+            </th>
+            <th>
+                Цена за час с абонементом
+            </th>
+            <th>
+                Статус
+            </th>
+        </tr>
 
+    <% foreach (var item in (IEnumerable<ParkgMVC.Models.tariffonplace>)ViewData["ActiveTariffs"]) {%>
+    
+        <tr>
+            <td>
+                <%: item.id_tariff_on_place %>
+            </td>
+            <td>
+                <%: item.SupportClimateControl %>
+            </td>
+            <td>
+                <%: item.Type %>
+            </td>
+            <td>
+                <%: String.Format("{0:F}", item.PriceForHourWithoutAbonement) %>
+            </td>
+            <td>
+                <%: String.Format("{0:F}", item.PriceForHourWithAbonement) %>
+            </td>
+            <td>
+                <%: item.Status %>
+            </td>
+        </tr>
+    
+    <% } %>
+
+    </table>
 </fieldset>
     <% using (Html.BeginForm("Places", "Home", FormMethod.Post)){%>
         <%: Html.ValidationSummary(true) %>

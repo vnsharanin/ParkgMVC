@@ -24,4 +24,3 @@ D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\MySql.Data.dll
 D:\!WIN_7\!!!mynewexperiment\ParkgMVC\bin\MySql.Data.Entity.EF6.dll
 D:\!WIN_7\!!!mynewexperiment\ParkgMVC\obj\Debug\ParkgMVC.dll
 D:\!WIN_7\!!!mynewexperiment\ParkgMVC\obj\Debug\ParkgMVC.pdb
-D:\!WIN_7\!!!mynewexperiment\ParkgMVC\obj\Debug\ParkgMVC.csprojResolveAssemblyReference.cache

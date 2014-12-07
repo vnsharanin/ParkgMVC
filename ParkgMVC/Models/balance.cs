@@ -35,19 +35,25 @@ namespace ParkgMVC.Models
         public bool Operation(string Type_Operation, decimal price, decimal BalanceAfterOperation,string Login, string Description,string Date)
         {
             bool Result = true;
-            balance bl = new balance();
-            bl.Type_Operation = Type_Operation;
-            bl.Sum = price;
-            bl.BalanceAfterOperation = BalanceAfterOperation;
-            bl.Login = Login;
-            bl.Description = Description;
-            bl.DateOperation = Date;
-            bl.Status = "True";
-            mp.balance.Add(bl);
-            mp.SaveChanges();
-
+            try
+            {
+                balance bl = new balance();
+                bl.Type_Operation = Type_Operation;
+                bl.Sum = price;
+                bl.BalanceAfterOperation = BalanceAfterOperation;
+                bl.Login = Login;
+                bl.Description = Description;
+                bl.DateOperation = Date;
+                bl.Status = "True";
+                mp.balance.Add(bl);
+                mp.SaveChanges();
+                Result = true;
+            }
+            catch
+            {
+                Result = false;
+            }
             return Result;
         }
-
     }
 }

@@ -95,10 +95,12 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\AbonementController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BalanceController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ResController.cs" />
+    <Compile Include="Controllers\TariffsController.cs" />
     <Compile Include="Controllers\TSController.cs" />
     <Compile Include="Controllers\VisitController.cs" />
     <Compile Include="Global.asax.cs">
@@ -165,7 +167,9 @@
   <ItemGroup>
     <Content Include="Content\style.css" />
     <Content Include="Global.asax" />
+    <Content Include="Views\Abonement\AbonementList.aspx" />
     <Content Include="Views\Balance\Balance.aspx" />
+    <Content Include="Views\Balance\cashFlow.aspx" />
     <Content Include="Views\Home\CreateVISIT.aspx" />
     <Content Include="Views\Res\Agreement.aspx" />
     <Content Include="Views\Shared\Error.aspx" />
@@ -175,10 +179,18 @@
     <Content Include="Views\Home\Index.aspx" />
     <Content Include="Views\Home\Places.aspx" />
     <Content Include="Views\Home\ZonesLevelsPlaces.aspx" />
+    <Content Include="Views\Tariffs\AllTariffs.aspx" />
+    <Content Include="Views\Tariffs\ReservationTariffs.aspx" />
+    <Content Include="Views\Tariffs\TariffsOnAbonements.aspx" />
+    <Content Include="Views\Tariffs\TariffsOnPlace.aspx" />
+    <Content Include="Views\Tariffs\VisitParameters.aspx" />
     <Content Include="Views\TS\CreateTS.aspx" />
     <Content Include="Views\Home\VISIT.aspx" />
     <Content Include="Views\Res\Reservation.aspx" />
     <Content Include="Views\TS\TS.aspx" />
+    <Content Include="Views\Visit\ListVisit.aspx" />
+    <Content Include="Views\Visit\RegisterIn.aspx" />
+    <Content Include="Views\Visit\RegisterOut.aspx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

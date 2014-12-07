@@ -135,18 +135,23 @@ namespace ParkgMVC.Controllers
                 reservation formedres = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
 
 
+                            ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
+                            if (exist != null)
+                            {
+
+                visit vis = mp.visit.Where(x => x.id_ts == exist.id_ts & x.DateOut == "dateout").FirstOrDefault();
+                if (vis == null)
+                {
 
                 usr us = mp.usr.Where(x => x.Login == Log).FirstOrDefault();
                 if (formedres.id_location_place != null)
                 {
-                    place free = mp.place.Where(x => x.id_location_place == formedres.id_location_place & x.Status == "Free").FirstOrDefault();
-                    if (us != null & free != null)
+                    place free = mp.place.Where(x => x.id_location_place == formedres.id_location_place).FirstOrDefault();
+                    if (us != null & free.Status == "Free")
                     {
                         if (us.Now_Balance >= 0)
                         {
-                            ts exist = mp.ts.Where(x => x.Login == Log & x.Status == "True").FirstOrDefault();
-                            if (exist != null)
-                            {
+
 
                                 reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
                                 if (tar != null)
@@ -159,17 +164,13 @@ namespace ParkgMVC.Controllers
                                     mp.Entry(formedres).State = EntityState.Modified;
                                     mp.SaveChanges();
                                     place newplace = new place();
-                                    newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place);
+                                    newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place,0);
                                 }
                                 else
                                 {
                                     ViewData["AnswerFromReservation"] = "Данный тариф бронирования не активен. Пожалуйста, переформируйте заявку!";
                                 }
-                            }
-                            else
-                            {
-                                ViewData["AnswerFromReservation"] = "Активирование бронирования без наличия ТС запрещено!";
-                            }
+
                         }
                         else if (us.Now_Balance < 0)
                         {
@@ -177,18 +178,33 @@ namespace ParkgMVC.Controllers
                         }
                     }
 
-                    else if (free == null)
+                    else if (free.Status != "Free")
                     {
-                        ViewData["AnswerFromReservation"] = "Месторасположение занято!";
+                        if (free.Status == "Occupied" || free.Status == "In waiting visit")
+                        {
+                            ViewData["AnswerFromReservation"] = "Месторасположение занято!";
+                        }
+                        else
+                        {
+                            ViewData["AnswerFromReservation"] = "Место недоступно!";
+                        }
+                        
                     }
                 }
                 else if (formedres.id_location_place == null)
                 {
                     ViewData["AnswerFromReservation"] = "Месторасположение не задано!";
                 }
-
-
-
+            }
+                else
+                {
+                    ViewData["AnswerFromReservation"] = "Формиремая бронь сохранена, но Вы не можете активировать бронирование, пока хотя бы одно из ваших ТС находится у нас на парковке!";
+                }
+                            }
+                            else
+                            {
+                                ViewData["AnswerFromReservation"] = "Активирование бронирования без наличия ТС запрещено!";
+                            }
 
                 ViewData["ReservationTariff"] = mp.reservation_tariff.Where(x => x.Status == "available").ToList();
                 return View(mp.reservation.Where(x => x.Login == Log & (x.Status == "Formed" || x.Status == "Active")).ToList());

@@ -24,6 +24,9 @@
             <th>
                 Количество мест
             </th>
+                        <th>
+                Количество свободных мест
+            </th>
         </tr>
 
     <% foreach (var item in Model) { %>
@@ -50,8 +53,15 @@
             <td>
                 <%: item.TypeLevel%>
             </td>
-             <td>
-                
+                                  <% ParkgMVC.Models.MyParkingEntities mp = new ParkgMVC.Models.MyParkingEntities();
+                                     int p = mp.place.Count(x => x.id_location_level == item.id_location_level);
+                                     int freep = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Free");
+                                     ViewData["AmPl"] = p; ViewData["AmFreePl"] = freep;%>
+             <td> 
+                <%: ViewData["AmPl"]%>
+            </td>
+                         <td> 
+                <%: ViewData["AmFreePl"]%>
             </td>
         </tr>
         <% } %>

@@ -105,29 +105,34 @@ namespace ParkgMVC.Models
             string result = "";
             try
             {
-                var ts = mp.ts.Where(x => x.id_ts == id & x.Login == Log).ToList();
-                var listts = mp.ts.Where(x => x.Login == Log & x.Status == "True").ToList();
-                int i = 0;
-                foreach (ts n in listts)
+                //Нельзя удалить тс которое находится на парковке.
+                //Обдумать идею, что нельзя удалить ни одно тс, если отрицателен баланс.
+                visit vis = mp.visit.Where(x => x.id_ts == id & x.DateOut == "dateout").FirstOrDefault();
+                if (vis == null)
                 {
-                    i++;
-                }
-                reservation exist = mp.reservation.Where(x => x.Login == Log & x.Status == "Active").FirstOrDefault();
-                if ((exist == null) || (exist != null & i > 1))
-                {
-                    foreach (ts n in ts)
+                    ts changets = mp.ts.Where(x => x.id_ts == id & x.Login == Log).FirstOrDefault();
+                    var listts = mp.ts.Where(x => x.Login == Log & x.Status == "True").ToList();
+                    int i = listts.Count();
+                    reservation exist = mp.reservation.Where(x => x.Login == Log & x.Status == "Active").FirstOrDefault();
+                    if ((exist == null) || (exist != null & i > 1))
                     {
-                        n.Status = "False";
-                        mp.Entry(n).State = EntityState.Modified;
+                        changets.Status = "False";
+                        mp.Entry(changets).State = EntityState.Modified;
                         mp.SaveChanges();
-                        break;
+
+                        result = "1";
                     }
-                    result = "1";
+                    else if (exist != null & i == 1)
+                    {
+                        result = "По правилам системы, имея в наличии одно ТС и активную бронь удаление ТС строго запрещено.";
+                    }
                 }
-                else if (exist != null & i == 1)
+                else
                 {
-                    result = "По правилам системы, имея в наличии одно ТС и активную бронь удаление ТС строго запрещено.";
+                    result = "По правилам системы удаление ТС, находящегося на парковке, строго запрещено.";
                 }
+
+
             }
             catch (Exception ex)
             {

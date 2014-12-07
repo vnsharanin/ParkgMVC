@@ -69,32 +69,74 @@ namespace ParkgMVC.Models
             try
             {
                 //format my date have view:  string d = "21.11.14 20:00";
+
+                decimal price = 0;
+                usr ur = mp.usr.Where(x => x.Login == obj.Login).FirstOrDefault();
+                balance bl = new balance();
+                place p = new place();
+
+                //Можно упростить задачу. Следующим коментируемым кодом
+                /*  obj.id_alternative_location_place == obj.id_location_place
+                 * то есть если место уже изменено на другое, то сделать автомобилисту бесплатную бронь(т.к. нарушена его потребность)
+                 * соответственно проверка на то что лучше это место или хуже не понадобится вообще.
+                 * 
+                 * сейчас действует схема, что бронь бесплатна если новое выданное место хуже или его нет вообще. (риск он принимал в
+                 * соглашении)
+                */
+                if (obj.id_alternative_location_place != null) {
+
+
+                    if (Describe != "Reservation was used")
+                    {
+                        //освобождающее место либо достанется кому-то, либо переведтся в свободное состояние
+                        p.FreePlace((long)obj.id_alternative_location_place);
+                    }
+
+                    //Эта проверка может непонадобится, если обдумать описанный комментарий выше.
+                    if (p.bestornot((long)obj.id_location_place, (long)obj.id_alternative_location_place) == true ||
+                        obj.id_alternative_location_place == obj.id_location_place)
+                        {
+
+
                 long span = 0;
-                place exemp = new place();
+
                 if (Describe == "Reservation was expired" | Describe == "Reservation was revoke")
                 {
                     span = Convert.ToDateTime(Date).Ticks - Convert.ToDateTime(obj.DateConnection).Ticks;
-                    //Перевод места в Free состояние
-                    exemp.ChangeStatus("Free", (long)obj.id_location_place);
                 }
                 else if (Describe == "Reservation was used")
                 {
+
+
+
                     DateTime mydate = Convert.ToDateTime(obj.DateConnection).AddMinutes(obj.reservation_tariff.FirstFreeTimeInMinutes);
-                    span = Convert.ToDateTime(Date).Ticks - mydate.Ticks;
+                    if (mydate <= Convert.ToDateTime(DateTime.Now.ToString("dd.MM.yy HH:mm")))
+                    {
+                        span = Convert.ToDateTime(Date).Ticks - mydate.Ticks;
+                    }
+
+
                 }
-                decimal hour = 60;
-                decimal priceinmin = (decimal)(obj.reservation_tariff.PriceInRubForHourHightFreeTime) / hour;
-                decimal price = (decimal)TimeSpan.FromTicks(span).TotalMinutes * priceinmin;
 
-                usr ur = mp.usr.Where(x => x.Login == obj.Login).FirstOrDefault();
-                    ur.Now_Balance = ur.Now_Balance - price;
-                    mp.Entry(ur).State = EntityState.Modified;
-                    mp.SaveChanges();
-                //Да и еще, расчеты делаются точно. Но не округлить ли баланс на выходе в лучшую сторону для автомобилиста, до копейки(сотых) хотя бы.
 
-                    balance bl = new balance();
-                    bl.Operation("Debit", price, (decimal)ur.Now_Balance, ur.Login, Describe, Date);
 
+
+
+                    decimal priceinmin = (decimal)(obj.reservation_tariff.PriceInRubForHourHightFreeTime) / 60;
+
+                            price = (decimal)TimeSpan.FromTicks(span).TotalMinutes * priceinmin;
+                            ur.Now_Balance = ur.Now_Balance - price;
+                            mp.Entry(ur).State = EntityState.Modified;
+                            mp.SaveChanges();
+                        }
+
+                    
+                    //Да и еще, расчеты делаются точно. Но не округлить ли баланс на выходе в лучшую сторону для автомобилиста, до копейки(сотых) хотя бы.
+                }
+
+                
+                bl.Operation("Debit", price, (decimal)ur.Now_Balance, ur.Login, Describe, Date);
+                
                 result = true;
             }
             catch

@@ -23,17 +23,38 @@ namespace ParkgMVC.Models
         public string FirstAttemptGoOut { get; set; }
         public string NextAttemptGoOut { get; set; }
         public long id_vis_param { get; set; }
-        public Nullable<long> id_reservation_user { get; set; }
-        public Nullable<long> id_abonement { get; set; }
         
         public virtual place place { get; set; }
         public virtual ts ts { get; set; }
         public virtual visitparameters visitparameters { get; set; }
+        MyParkingEntities mp = new MyParkingEntities();
 
-        public bool RegisterIn()
+        public bool RegisterIn(long id_loc_place, long id_sts, string Date, long id_vis_param)
         {
             bool Result = true;
+
+
+
+            visit vis = new visit();
+            vis.id_ts = id_sts;
+            vis.id_location_place = id_loc_place;
+            vis.DateIn = Date;
+            vis.DateOut = "dateout";
+            vis.FirstAttemptGoOut = "dateout2";
+            vis.NextAttemptGoOut = "dateout3";
+            vis.id_vis_param = id_vis_param;
+            vis.Status = "Public";
+            mp.visit.Add(vis);
+            mp.SaveChanges();
+
+
+
+
             return Result;
+
+
+
+
         }
     }
 }
