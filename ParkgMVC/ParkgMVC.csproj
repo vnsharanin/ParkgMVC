@@ -171,6 +171,8 @@
     <Content Include="Views\Balance\Balance.aspx" />
     <Content Include="Views\Balance\cashFlow.aspx" />
     <Content Include="Views\Home\CreateVISIT.aspx" />
+    <Content Include="Views\Home\Edit_a_p.aspx" />
+    <Content Include="Views\Home\Place_tariff.aspx" />
     <Content Include="Views\Res\Agreement.aspx" />
     <Content Include="Views\Shared\Error.aspx" />
     <Content Include="Views\Home\EditAmountPlace.aspx" />

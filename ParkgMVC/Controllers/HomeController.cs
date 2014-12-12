@@ -76,9 +76,26 @@ namespace ParkgMVC.Controllers
 
 
 
-        public ActionResult Levels()
+        public ActionResult Levels(Int32? Parking_zone)
         {
-            return RedirectToAction("ZonesLevelsPlaces");
+            if (Parking_zone != null)
+            {
+                levelzone lz = mp.levelzone.Where(x => x.Parking_zone == Parking_zone).FirstOrDefault();
+                if (lz != null)
+                {
+                    ViewData["Reservation"] = "";
+                    ViewData["Zone"] = "Зона №" + Convert.ToString(Parking_zone);
+                    return View(mp.levelzone.Where(x => x.Parking_zone == Parking_zone));
+                }
+                else
+                {
+                    return RedirectToAction("ZonesLevelsPlaces");
+                }
+            }
+            else
+            {
+                return RedirectToAction("ZonesLevelsPlaces");
+            }
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -114,12 +131,12 @@ namespace ParkgMVC.Controllers
             if (Value == "RESERVATION")
             {
                 ViewData["Reservation"] = Value;
-                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free"));
+                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x=>x.NumberPlace));
             }
             else
             {
                 ViewData["Reservation"] = "";
-                return View(mp.place.Where(x => x.id_location_level == id_location_level));
+                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status != "Was replaced").OrderBy(x=>x.NumberPlace));
             }
         }
 
@@ -208,7 +225,7 @@ namespace ParkgMVC.Controllers
                                 mp.Entry(formedres).State = EntityState.Modified;
                                 mp.SaveChanges();
 
-                                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x => x.NumberPlace).ToList());
                             }
 
                         }
@@ -226,7 +243,7 @@ namespace ParkgMVC.Controllers
                             {
                                 ViewData["ReservationPlace"] = "Место недоступно!";
                             }
-                            return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                            return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x=>x.NumberPlace).ToList());
                         }
             }
                 else
@@ -236,7 +253,7 @@ namespace ParkgMVC.Controllers
                         formedres.id_alternative_location_place = ChoosePlace;
                         mp.Entry(formedres).State = EntityState.Modified;
                         mp.SaveChanges();
-                                    return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x => x.NumberPlace).ToList());
                    
                                 }
                     }
@@ -247,13 +264,14 @@ namespace ParkgMVC.Controllers
                         formedres.id_alternative_location_place = ChoosePlace;
                         mp.Entry(formedres).State = EntityState.Modified;
                         mp.SaveChanges();
-                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x => x.NumberPlace).ToList());
                     }
                     }
                     else
                     {
+                        //МОЖНО СДЕЛАТЬ ПЕРЕНАПРАВЛЕНИЕ СРАЗУ НА Reservation в ResController с этим же самым сообщением. Или на принятие соглашения.
                         ViewData["ReservationPlace"] = "Система не нашла формирующейся заявки! Возможно, она была удалена вами.";
-                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x => x.NumberPlace).ToList());
                     }
 
 
@@ -325,14 +343,14 @@ namespace ParkgMVC.Controllers
                     {
                         ViewData["ReservationPlace"] = "Система не нашла формирующейся заявки! Возможно, она была удалена вами.";
                         ViewData["Reservation"] = "RESERVATION";
-                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                        return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x => x.NumberPlace).ToList());
                     }
                 }
                 else if (activeres != null)
                 {
                     ViewData["ReservationPlace"] = "Вы уже имеете активное забронированное месторасположение!";
                     ViewData["Reservation"] = "RESERVATION";
-                    return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").ToList());
+                    return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x => x.NumberPlace).ToList());
                 }
                 ViewData["ReservationTariff"] = mp.reservation_tariff.Where(x => x.Status == "available").ToList();
                 return RedirectToAction("Reservation", new { Controller = "Res" });
@@ -342,9 +360,223 @@ namespace ParkgMVC.Controllers
                 return RedirectToAction("LogOn", new { Controller = "Account" });
             }
         }
+        //Не совсем работает так.Когда перехожу с дешевого на дорогой тариф, в альтернативный записыватся дорогой а не дешевый первоначальный
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Places", MatchFormValue = "Stop_work")]
+        public ActionResult Stop_work(Int32 id_location_level, Int32 id_loc_pl, FormCollection form)
+        {
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+
+            reservation expired = new reservation();
+            expired.FindOnExpired("");
+
+            place not_working_place = mp.place.Where(x => x.id_location_place == id_loc_pl).FirstOrDefault();
+            place change = new place();
+
+            if (not_working_place.Status == "In waiting visit")
+            {
+                change.ChangeStatus("Not working", id_loc_pl, 0);
+                reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == id_loc_pl || x.id_alternative_location_place == id_loc_pl)).FirstOrDefault();
+                if (res != null)
+                {
+                    place findmax = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement >= res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderBy(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                    if (findmax != null)
+                    {
+                        change.ChangeStatus("In waiting visit", (long)findmax.id_location_place, (int)res.place.id_tariff_on_place);
+                        res.id_alternative_location_place = (int)findmax.id_location_place;
+                        mp.Entry(res).State = EntityState.Modified;
+                        mp.SaveChanges();
+                    }
+                    else if (findmax == null)
+                    {
+                        place findmin = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement < res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderByDescending(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                        if (findmin != null)
+                        {
+                            change.ChangeStatus("In waiting visit", (long)findmin.id_location_place, 0);
+                            res.id_alternative_location_place = (int)findmin.id_location_place;
+                            mp.Entry(res).State = EntityState.Modified;
+                            mp.SaveChanges();
+                        }
+                        else
+                        {
+                            res.id_alternative_location_place = null;
+                            mp.Entry(res).State = EntityState.Modified;
+                            mp.SaveChanges();
+                        }
+                    }
+                }
+            }
+            else { change.ChangeStatus("Not working", id_loc_pl, 0); }
+
+            //& (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")
+            ViewData["Reservation"] = "";
+            ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_place.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_place.levelzone.Level) + " ; Тип уровня: " + not_working_place.levelzone.TypeLevel;
+            ViewData["ReservationPlace"] = "Место №" + not_working_place.NumberPlace + " было успешно переведено в неактивное состояние.";
+            return View(mp.place.Where(x => x.id_location_level == id_location_level & (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")).OrderBy(x => x.NumberPlace).ToList());
+            
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Places", MatchFormValue = "Start_work")]
+        public ActionResult Start_work(Int32 id_location_level, Int32 id_loc_pl, FormCollection form)
+        {
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+            reservation expired = new reservation();
+            expired.FindOnExpired("");
+            place not_working_place = mp.place.Where(x => x.id_location_place == id_loc_pl).FirstOrDefault();
+            place change = new place();
+            
+            reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == id_loc_pl)).FirstOrDefault();
+            if (res != null)
+            {
+                if (res.id_alternative_location_place != null)
+                {
+                    change.FreePlace((long)res.id_alternative_location_place);
+                }
+                res.id_alternative_location_place = id_loc_pl;
+                mp.Entry(res).State = EntityState.Modified;
+                mp.SaveChanges();
+                change.ChangeStatus("In waiting visit", id_loc_pl, 0); 
+            }
+            else
+            {
+                change.FreePlace((long)id_loc_pl);
+            }
+            ViewData["Reservation"] = "";
+            ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_place.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_place.levelzone.Level) + " ; Тип уровня: " + not_working_place.levelzone.TypeLevel;           
+            ViewData["ReservationPlace"] = "Место №" + not_working_place.NumberPlace + " было успешно переведено в активное состояние.";
+            return View(mp.place.Where(x => x.id_location_level == id_location_level & (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")).OrderBy(x => x.NumberPlace).ToList());
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Place_tariff", MatchFormValue = "Change_tariff_for_this_place")]
+        public ActionResult Change_tariff_for_this_place(Int32 id_location_level, Int32 id_loc_pl, FormCollection form)
+        {
+            
+            place not_working_place = mp.place.Where(x => x.id_location_place == id_loc_pl).FirstOrDefault();
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active" & x.id_tariff_on_place != not_working_place.id_tariff_on_place);
+            ViewData["Place_tariff"] = "Выбор нового тарифа для месторасположения";
+            //ViewData["Place_tariff_err_message"] = "Тариф для места №" + not_working_place.NumberPlace + " был успешно сменен.";
+            return View(not_working_place);
+        }
+
+
+        public ActionResult Place_tariff(Int32? objp, Int32? txt)
+        {
+            try
+            {
+                if (objp != null & txt != null)
+                {
+                    place not_working_plac = mp.place.Where(x => x.id_location_place == objp).FirstOrDefault();
+                    ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                    if (txt == 1)
+                    {
+                        ViewData["Place_tariff_err_message"] = "Выбранный Вами тариф перестал быть активным.";
+                    }
+
+                    ViewData["Place_tariff"] = "Выбор нового тарифа для месторасположения";
+                    return View(not_working_plac);
+                }
+                else
+                {
+                    return RedirectToAction("ZonesLevelsPlaces");
+                }
+
+            }
+            catch {
+                return RedirectToAction("ZonesLevelsPlaces");
+            }
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Places", MatchFormValue = "Choose_tariff_on_place")]
+        public ActionResult Choose_tariff_on_place(Int32 not_working_place, Int32 choose_tariff_on_place, FormCollection form)
+        {//Может вывести в качестве информации текущий тариф??
+            reservation expired = new reservation();
+            expired.FindOnExpired("");
+            ViewData["Reservation"] = "";
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+            place not_working_plac = mp.place.Where(x => x.id_location_place == not_working_place).FirstOrDefault();
+
+            tariffonplace choosetop = mp.tariffonplace.Where(x => x.id_tariff_on_place == choose_tariff_on_place & x.Status == "Active").FirstOrDefault();
+            if (choosetop != null)
+            {
+                
+                    reservation searchactiveres = mp.reservation.Where(x => x.id_location_place == not_working_place & x.Status == "Active").FirstOrDefault();
+                    if (searchactiveres != null)
+                    {
+                        ViewData["ReservationPlace"] = "Вы не можете изменить тариф для этого места, пока в этом расположении нуждается один из участников системы";
+                    }
+                    else
+                    {
+                        place thplace = mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & x.NumberPlace == not_working_plac.NumberPlace & x.Status == "Was replaced" & x.id_tariff_on_place == choose_tariff_on_place).FirstOrDefault();
+                        if (thplace == null)
+                        {
+                            place place_new = new place();
+                            place_new.id_location_level = not_working_plac.id_location_level;
+                            place_new.id_tariff_on_place = choose_tariff_on_place;
+                            place_new.Status = not_working_plac.Status;
+                            place_new.NumberPlace = not_working_plac.NumberPlace;
+                            place_new.id_alternative_tariff_on_place = choose_tariff_on_place;
+                            mp.place.Add(place_new);
+                            mp.SaveChanges();
+
+                            not_working_plac.Status = "Was replaced";
+                            mp.Entry(not_working_plac).State = EntityState.Modified;
+                            mp.SaveChanges();
+                            ViewData["ReservationPlace"] = "Тариф для места №" + not_working_plac.NumberPlace + " был успешно сменен.";
+                        }
+                        else
+                        {
+                            thplace.Status = not_working_plac.Status;
+                            mp.Entry(thplace).State = EntityState.Modified;
+                            mp.SaveChanges();
+
+                            not_working_plac.Status = "Was replaced";
+                            mp.Entry(not_working_plac).State = EntityState.Modified;
+                            mp.SaveChanges();
+                            ViewData["ReservationPlace"] = "Тариф для места №" + not_working_plac.NumberPlace + " был успешно сменен.";
+                        }
+                    
+                }
+
+                    //return View(mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & x.Status != "Was replaced").OrderBy(x=>x.NumberPlace).ToList());
+
+                ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_plac.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_plac.levelzone.Level) + " ; Тип уровня: " + not_working_plac.levelzone.TypeLevel;
+                return View(mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")).OrderBy(x=>x.NumberPlace).ToList());
+            }
+            else
+            {
+                return RedirectToAction("Place_tariff", new { objp = not_working_place, txt = 1 });
+            }
+        }
 
         
 
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Edit_a_p", MatchFormValue = "Edit_amount_place")]
+        public ActionResult Edit_amount_place(Int32 id_location_level)
+        {
+            levelzone edit_place_for_this_level = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
+            return View(edit_place_for_this_level);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Edit_a_p", MatchFormValue = "Change_level")]
+        public ActionResult Change_level(Int32 id_location_level, Int32 Parking_zone, string AmPlace, string AdPlace, FormCollection form)
+        {
+            //В случае успеха вернуть
+           // return RedirectToAction("Levels", new { Parking_zone = Parking_zone });
+
+            ViewData["EditLevel"] = AmPlace + " " + AdPlace;
+
+
+
+
+
+            levelzone edit_place_for_this_level = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
+            return View(edit_place_for_this_level);
+        }
         /*
 
         //==========================================

@@ -5,16 +5,19 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-
+<h1 style="color:#FF0000"><%: ViewData["EditLevel"]%></h1>
     <h1><%: ViewData["Reservation"] %></h1>
 <fieldset>
     <h2>Levels</h2>
         <%: ViewData["Zone"] %>
     <table>
         <tr>
+            <% if (User.IsInRole("Admin"))
+            { %>
             <th></th>
-                        <th></th>
-                                    <th></th>
+            <th></th>
+                <% } %>
+            <th></th>
             <th>
                 Level
             </th>
@@ -30,23 +33,39 @@
         </tr>
 
     <% foreach (var item in Model) { %>
-                <% using (Html.BeginForm("Places", "Home", FormMethod.Post)){%>
+
+        <tr>
+                    <% if (User.IsInRole("Admin"))
+               { %>
+                <td>
+                 <% using (Html.BeginForm("Edit_a_p", "Home", FormMethod.Post))
+                    {%>
+                    <input type="hidden" name="id_location_level" id="Hidden6" value="<%: item.id_location_level %>" />
+                <input type="submit" name="Edit_a_p" id="Edit_amount_place" value="Edit_amount_place" />
+                  <% } %>
+
+                </td> 
+                 <% } %>
+
+                                <% using (Html.BeginForm("Places", "Home", FormMethod.Post)){%>
             <input type="hidden" name="Value" id="Hidden1" value="<%: ViewData["Reservation"] %>" />
             <input type="hidden" name="zone" id="Hidden2" value="<%: item.Parking_zone %>" />
             <input type="hidden" name="level" id="Hidden3" value="<%: item.Level %>" />
             <input type="hidden" name="type_level" id="Hidden5" value="<%: item.TypeLevel %>" />
             <input type="hidden" name="id_location_level" id="Hidden4" value="<%: item.id_location_level %>" />
-        <tr>
-            <td>
-                <%: Html.ActionLink("Edit", "EditAmountPlace", new { id_location_level = item.id_location_level })%>
-                </td>
-                <td>
 
-                                <input type="submit" name="Places" id="Select_level" value="Select_level" />
-               </td>
-               <td>
+                                                 <% if (User.IsInRole("Admin"))
+               { %>
+                <td>
                 <%: Html.ActionLink("Delete", "Delete", new { id_location_level = item.id_location_level })%>
+                 </td>
+                  <% } %>
+               
+                
+            <td>
+                                <input type="submit" name="Places" id="Select_level" value="Select_level" />
             </td>
+                      <% } %>
             <td>
                 <%: item.Level %>
             </td>
@@ -54,7 +73,7 @@
                 <%: item.TypeLevel%>
             </td>
                                   <% ParkgMVC.Models.MyParkingEntities mp = new ParkgMVC.Models.MyParkingEntities();
-                                     int p = mp.place.Count(x => x.id_location_level == item.id_location_level);
+                                     int p = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status != "Was replaced");
                                      int freep = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Free");
                                      ViewData["AmPl"] = p; ViewData["AmFreePl"] = freep;%>
              <td> 
@@ -64,7 +83,7 @@
                 <%: ViewData["AmFreePl"]%>
             </td>
         </tr>
-        <% } %>
+
     <% } %>
 
     </table>
