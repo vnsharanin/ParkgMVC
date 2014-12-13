@@ -116,7 +116,7 @@
 
                            <% if (ViewData["Reservation"].ToString() == "RESERVATION") { %><td>
              <input type="hidden" name="id_location_level" id="id_location_level" value="<%: item.id_location_level %>" />
-
+             <input type="hidden" name="tariff" id="tariff" value="<%: item.id_tariff_on_place %>" />
                 <input type="radio" id="ChoosePlace" name="ChoosePlace" value="<%: item.id_location_place %>" onchange="document.getElementById('SaveReservation').disabled = !this.checked; document.getElementById('ConnectReservation').disabled = !this.checked; document.getElementById('label').innerHTML='';"/>
                
                         </td>   <%   } %>

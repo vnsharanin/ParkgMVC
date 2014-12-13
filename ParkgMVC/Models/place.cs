@@ -181,8 +181,6 @@ namespace ParkgMVC.Models
                                 pl.ChangeStatus("In waiting visit", free_id_loc_place, (int)fp.id_tariff_on_place);
                                 break;
                             }
-
-
                         }
                     }
                 }
@@ -195,8 +193,6 @@ namespace ParkgMVC.Models
                         pl.ChangeStatus("Free", free_id_loc_place, 0);
                         res = false ;
                     }
-                
-                
             }
             return res;
         }
@@ -213,8 +209,99 @@ namespace ParkgMVC.Models
         }
 
 
+        public bool Disable(Int32 id_loc_level, Int32 amount_place)
+        {
+            bool Result = true;
 
+            return Result;
+        }
 
+        public string AddPlace(Int32 id_loc_level, Int32 amount_added_place, string Status, long id_tariff_on_place)
+        {
+            string Result = "";
+            reservation expired = new reservation();
+            expired.FindOnExpired("");
+            place last = mp.place.Where(x => x.id_location_level == id_loc_level & x.Status != "Was replaced" & x.Status != "Disabled").OrderByDescending(x => x.NumberPlace).FirstOrDefault();
+            Int32 last_place = 0;
+            if (last != null)
+            {
+                last_place = last.NumberPlace+1;
+            }
+            else { last_place = 1; }
 
+            for (int i = last_place; i < last_place + amount_added_place; i++)
+            {
+                place disabled = mp.place.Where(x => x.id_location_level == id_loc_level & x.Status == "Disabled" & x.NumberPlace == i).FirstOrDefault();
+                place change = new place();
+                if (disabled != null)
+                {
+                    reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == disabled.id_location_place)).FirstOrDefault();
+                    if (res != null)
+                    {
+
+                        if (Status == "Free")
+                        {
+                            if (res.id_alternative_location_place != null)
+                            {
+                                change.FreePlace((long)res.id_alternative_location_place);
+                            }
+                            res.id_alternative_location_place = (int)disabled.id_location_place;
+                            mp.Entry(res).State = EntityState.Modified;
+                            mp.SaveChanges();
+                            // change.ChangeStatus("In waiting visit", disabled.id_location_place, 0);
+                            //Т.е. админ должен потом решить включить ли то место с тем тарифом или ждать пока бронь кончится,
+                            //а потом как доступ к изменению тарифу будет открыт(как закончится бронь) он его изменит и включит.
+                            change.ChangeStatus("Not working", disabled.id_location_place, 0);
+                            Result = "0";
+                        }
+                        else
+                        {
+                            if (Result != "0")
+                            {
+                                Result = "1";
+                            }
+                            change.ChangeStatus(Status, disabled.id_location_place, 0);
+                        }
+                                               
+                    }
+                    else
+                    {
+                        disabled.Status = Status;
+                        disabled.id_tariff_on_place = id_tariff_on_place;
+                        disabled.id_alternative_tariff_on_place = (int)id_tariff_on_place;
+                        mp.Entry(disabled).State = EntityState.Modified;
+                        mp.SaveChanges();
+                        if (Status == "Free")
+                        {
+                            change.FreePlace((long)disabled.id_location_place);
+                        }
+                    }
+                }
+                else
+                {
+                    place new_place = new place();
+                    new_place.NumberPlace = i;
+                    new_place.Status = Status;
+                    new_place.id_tariff_on_place = id_tariff_on_place;
+                    new_place.id_alternative_tariff_on_place = (int)id_tariff_on_place;
+                    new_place.id_location_level = id_loc_level;
+                    mp.place.Add(new_place);
+                    mp.SaveChanges();
+                    if (Status == "Free")
+                    {
+                        change.FreePlace((long)disabled.id_location_place);
+                    }
+                }
+            }
+            if (Result == "0")
+            {
+                Result = "К некоторым местам смена тарифа будет доступна по истечении действия активных записей бронирований, которые прикреплены к этим местам. К местам, к которым не удалось произвести смену тарифа, был присвоен статус 'Not working', их можно так же включить не меняя тариф, перейдя в просмотр мест этого уровня.";
+            }
+            else if (Result == "1")
+            {
+                Result = "К некоторым местам не удалось произвести смену тарифа, поскольку их ожидают активные записи бронирования. Смена тарифа будет доступна по истечении действия активных записей бронирований.";
+            }
+            return Result;
+        }
     }
 }

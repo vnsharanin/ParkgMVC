@@ -22,8 +22,17 @@
             </th>
         </tr>
 
+                 <% ParkgMVC.Models.MyParkingEntities mp = new ParkgMVC.Models.MyParkingEntities();%>
 
     <% foreach (var item in Model) { %>
+
+                    <%  int p = mp.place.Count(x => x.levelzone.Parking_zone == item.Parking_zone & x.Status != "Was replaced" & x.Status != "Disabled");
+                        int disabled = mp.place.Count(x => x.levelzone.Parking_zone == item.Parking_zone & x.Status == "Was replaced" & x.Status == "Disabled");           
+                    %>
+            <% if (disabled == p & !User.IsInRole("Admin")) { }
+               else
+               { %>
+
             <% using (Html.BeginForm("Levels", "Home", FormMethod.Post)){%>
         <input type="hidden" name="Value" id="Hidden1" value="<%: ViewData["Reservation"] %>" />
     <input type="hidden" name="Parking_zone" id="Hidden2" value="<%: item.Parking_zone %>" />
@@ -44,7 +53,7 @@
                 <%: item.Address %>
             </td>
         </tr>
-    
+        <% } %>
     <% } %>
     <% } %>
     </table>

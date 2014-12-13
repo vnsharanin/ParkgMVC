@@ -136,7 +136,7 @@ namespace ParkgMVC.Controllers
             else
             {
                 ViewData["Reservation"] = "";
-                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status != "Was replaced").OrderBy(x=>x.NumberPlace));
+                return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status != "Was replaced" & x.Status != "Disabled").OrderBy(x=>x.NumberPlace));
             }
         }
 
@@ -144,7 +144,7 @@ namespace ParkgMVC.Controllers
 
         [AcceptVerbs(HttpVerbs.Post)]
         [MultiButton(MatchFormKey = "Places", MatchFormValue = "ConnectReservation")]
-        public ActionResult ConnectReservation(Int32 ChoosePlace, Int32 id_location_level, FormCollection form)
+        public ActionResult ConnectReservation(Int32? tariff, Int32 ChoosePlace, Int32 id_location_level, FormCollection form)
         {
             ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
             reservation find = new reservation();
@@ -186,23 +186,34 @@ namespace ParkgMVC.Controllers
                                     reservation_tariff tar = mp.reservation_tariff.Where(x => x.Status == "available" & x.id_Reservation_Tariff == formedres.id_Reservation_Tariff).FirstOrDefault();
                                     if (tar != null)
                                     {
+                                        //Ниже допустимый коментируемый код
+                                        tariffonplace p = mp.tariffonplace.Where(x => x.id_tariff_on_place == tariff & x.Status == "Active").FirstOrDefault();
+                                        if (p != null) //до сюда
+                                        {
+                                            formedres.id_location_place = ChoosePlace;
+                                            formedres.id_alternative_location_place = ChoosePlace;
+                                            formedres.Status = "Active";
+                                            formedres.Description = "Reservation connect";
+                                            formedres.DateConnection = Date;
+                                            DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
+                                            formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
+                                            mp.Entry(formedres).State = EntityState.Modified;
+                                            mp.SaveChanges();
+                                            place newplace = new place();
+                                            newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place, 0);
+                                        }
+                                       // и соответственно противное условие тожн комментируемое
+                                        else if (p==null) {
+                                            formedres.id_location_place = ChoosePlace;
+                                            formedres.id_alternative_location_place = ChoosePlace;
+                                            mp.Entry(formedres).State = EntityState.Modified;
+                                            mp.SaveChanges();
 
-                                        //tariffOnplace p = mp.tariff_on_place.where(x=>x.id_tariff_on_place == tariff & x.Status == "Active")
-                                        //if p != null
-                                        formedres.id_location_place = ChoosePlace;
-                                        formedres.id_alternative_location_place = ChoosePlace;
-                                        formedres.Status = "Active";
-                                        formedres.Description = "Reservation connect";
-                                        formedres.DateConnection = Date;
-                                        DateTime mydate = Convert.ToDateTime(Date).AddHours(tar.ValidityPeriodFromTheTimeOfActivationInHour);//Согласно активному тарифу
-                                        formedres.ApproximatelyDateOutFromActivity = Convert.ToString(mydate);
-                                        mp.Entry(formedres).State = EntityState.Modified;
-                                        mp.SaveChanges();
-                                        place newplace = new place();
-                                        newplace.ChangeStatus("In waiting visit", (long)formedres.id_location_place,0);
-
-                                        //else p==null return сообщение что тариф для места изменился, отсылаю через вбю дата актуальные тарифы и места с актуальными тарифами
-                                        //Подумать стоит ли делать это(комментированный примерный код) в ResController при подключении брони
+                                            ViewData["ReservationPlace"] = "Внимание, тариф для места изменился!";
+                                            return View(mp.place.Where(x => x.id_location_level == id_location_level & x.Status == "Free").OrderBy(x => x.NumberPlace).ToList());
+    
+                                        }//Комментировать можно чтобы уменьшить время общения с автомобилистом, но и проинформировать по сути тоже надо
+                                                //Подумать стоит ли делать это(комментированный примерный код) в ResController при подключении брони
                                     }
                                     else
                                     {
@@ -360,7 +371,7 @@ namespace ParkgMVC.Controllers
                 return RedirectToAction("LogOn", new { Controller = "Account" });
             }
         }
-        //Не совсем работает так.Когда перехожу с дешевого на дорогой тариф, в альтернативный записыватся дорогой а не дешевый первоначальный
+       
         [AcceptVerbs(HttpVerbs.Post)]
         [MultiButton(MatchFormKey = "Places", MatchFormValue = "Stop_work")]
         public ActionResult Stop_work(Int32 id_location_level, Int32 id_loc_pl, FormCollection form)
@@ -491,17 +502,18 @@ namespace ParkgMVC.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         [MultiButton(MatchFormKey = "Places", MatchFormValue = "Choose_tariff_on_place")]
         public ActionResult Choose_tariff_on_place(Int32 not_working_place, Int32 choose_tariff_on_place, FormCollection form)
-        {//Может вывести в качестве информации текущий тариф??
+        {//Может вывести в качестве информации текущий тариф?? 
             reservation expired = new reservation();
             expired.FindOnExpired("");
             ViewData["Reservation"] = "";
             ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
-            place not_working_plac = mp.place.Where(x => x.id_location_place == not_working_place).FirstOrDefault();
-
-            tariffonplace choosetop = mp.tariffonplace.Where(x => x.id_tariff_on_place == choose_tariff_on_place & x.Status == "Active").FirstOrDefault();
-            if (choosetop != null)
+            place not_working_plac = mp.place.Where(x => x.id_location_place == not_working_place & (x.Status=="Free" || x.Status=="Not working")).FirstOrDefault();
+            if (not_working_plac != null)
             {
-                
+                tariffonplace choosetop = mp.tariffonplace.Where(x => x.id_tariff_on_place == choose_tariff_on_place & x.Status == "Active").FirstOrDefault();
+                if (choosetop != null)
+                {
+
                     reservation searchactiveres = mp.reservation.Where(x => x.id_location_place == not_working_place & x.Status == "Active").FirstOrDefault();
                     if (searchactiveres != null)
                     {
@@ -512,19 +524,24 @@ namespace ParkgMVC.Controllers
                         place thplace = mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & x.NumberPlace == not_working_plac.NumberPlace & x.Status == "Was replaced" & x.id_tariff_on_place == choose_tariff_on_place).FirstOrDefault();
                         if (thplace == null)
                         {
-                            place place_new = new place();
-                            place_new.id_location_level = not_working_plac.id_location_level;
-                            place_new.id_tariff_on_place = choose_tariff_on_place;
-                            place_new.Status = not_working_plac.Status;
-                            place_new.NumberPlace = not_working_plac.NumberPlace;
-                            place_new.id_alternative_tariff_on_place = choose_tariff_on_place;
-                            mp.place.Add(place_new);
-                            mp.SaveChanges();
+                            if (not_working_plac.id_tariff_on_place != choose_tariff_on_place)
+                            {
+                                place place_new = new place();
+                                place_new.id_location_level = not_working_plac.id_location_level;
+                                place_new.id_tariff_on_place = choose_tariff_on_place;
+                                place_new.Status = not_working_plac.Status;
+                                place_new.NumberPlace = not_working_plac.NumberPlace;
+                                place_new.id_alternative_tariff_on_place = choose_tariff_on_place;
+                                mp.place.Add(place_new);
+                                mp.SaveChanges();
 
-                            not_working_plac.Status = "Was replaced";
-                            mp.Entry(not_working_plac).State = EntityState.Modified;
-                            mp.SaveChanges();
-                            ViewData["ReservationPlace"] = "Тариф для места №" + not_working_plac.NumberPlace + " был успешно сменен.";
+                                not_working_plac.Status = "Was replaced";
+                                mp.Entry(not_working_plac).State = EntityState.Modified;
+                                mp.SaveChanges();
+                                ViewData["ReservationPlace"] = "Тариф для места №" + not_working_plac.NumberPlace + " был успешно сменен.";
+                            }
+                            ViewData["ReservationPlace"] = "Тариф для места №" + not_working_plac.NumberPlace + " не отличался от предыдущего.";
+                            //Перекинуть на представление редактирования в качестве кода сообщения выше будет txt=2, в том представлении оно определится
                         }
                         else
                         {
@@ -537,46 +554,323 @@ namespace ParkgMVC.Controllers
                             mp.SaveChanges();
                             ViewData["ReservationPlace"] = "Тариф для места №" + not_working_plac.NumberPlace + " был успешно сменен.";
                         }
-                    
-                }
+
+                    }
 
                     //return View(mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & x.Status != "Was replaced").OrderBy(x=>x.NumberPlace).ToList());
 
-                ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_plac.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_plac.levelzone.Level) + " ; Тип уровня: " + not_working_plac.levelzone.TypeLevel;
-                return View(mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")).OrderBy(x=>x.NumberPlace).ToList());
+                    ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_plac.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_plac.levelzone.Level) + " ; Тип уровня: " + not_working_plac.levelzone.TypeLevel;
+                    return View(mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")).OrderBy(x => x.NumberPlace).ToList());
+                }
+                else
+                {
+                    return RedirectToAction("Place_tariff", new { objp = not_working_place, txt = 1 });
+                }
             }
             else
             {
-                return RedirectToAction("Place_tariff", new { objp = not_working_place, txt = 1 });
+                ViewData["ReservationPlace"] = "Вы не можете изменить тариф для этого места, пока в этом расположении нуждается один из участников системы";
+                ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_plac.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_plac.levelzone.Level) + " ; Тип уровня: " + not_working_plac.levelzone.TypeLevel;
+                return View(mp.place.Where(x => x.id_location_level == not_working_plac.id_location_level & (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")).OrderBy(x => x.NumberPlace).ToList());
+
             }
         }
 
+        public ActionResult Edit_a_p()
+        {
+            return RedirectToAction("ZonesLevelsPlaces");
+        }
         
 
         [AcceptVerbs(HttpVerbs.Post)]
         [MultiButton(MatchFormKey = "Edit_a_p", MatchFormValue = "Edit_amount_place")]
         public ActionResult Edit_amount_place(Int32 id_location_level)
         {
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
             levelzone edit_place_for_this_level = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
             return View(edit_place_for_this_level);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
         [MultiButton(MatchFormKey = "Edit_a_p", MatchFormValue = "Change_level")]
-        public ActionResult Change_level(Int32 id_location_level, Int32 Parking_zone, string AmPlace, string AdPlace, FormCollection form)
+        public ActionResult Change_level(Int32 EditPlace, Int32? ChTariffForPlaces, Int32 id_location_level, Int32 Parking_zone, string NewAmountPlaces, string AddPlaces, string Status, string TariffForAllPlace, FormCollection form)
         {
             //В случае успеха вернуть
-           // return RedirectToAction("Levels", new { Parking_zone = Parking_zone });
+            // return RedirectToAction("Levels", new { Parking_zone = Parking_zone });
+            levelzone edit_level = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
 
-            ViewData["EditLevel"] = AmPlace + " " + AdPlace;
+            //  ViewData["EditLevel"] = "ChTariffForPlaces: " + ChTariffForPlaces + " " + AmPlace + " " + AdPlace + " " + type.TypeLevel + " " + type.id_location_level + " " + TariffForAllPlace + " Status:" + Status;
+
+            if (EditPlace == 1)
+            {
+                Int32 AmountPlace = 0;
+                Int32 AddPlace = 0;
+                int ap = mp.place.Count(x => x.id_location_level == id_location_level & x.Status != "Was replaced" & x.Status != "Disabled");
+
+
+                    if (ChTariffForPlaces != null & NewAmountPlaces == null & AddPlaces == null & TariffForAllPlace != "True")
+                    {
+                        ViewData["EditLevel"] = "Выбирая тариф необходимо выбрать как его применить, а именно, либо ко всем местам уровня (поставив соответсвующую галочку), либо задать новое или добавляемое количество мест. Причем, задавая новое количество мест меньше текущего количества, выбранный тариф проигнорируется соответственно.";
+                        ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                        return View(edit_level);
+                    }
+                    else
+                        if (ChTariffForPlaces == null & NewAmountPlaces == null & AddPlaces == null & TariffForAllPlace != "True")
+                        {
+                            ViewData["EditLevel"] = "Изменений не произошло.";
+                            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                            return View(edit_level);
+                        }
+
+                    
+                    if (NewAmountPlaces != null  & AddPlaces == null)
+                    {
+                        try
+                        {
+                            AmountPlace = Convert.ToInt32(NewAmountPlaces);
+                            if (AmountPlace < 0 || AmountPlace == ap)
+                            {
+                                ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть положительным, целочисленным и отличаться от текущего количества мест в уровне.";
+                                ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                                return View(edit_level);
+                            }
+                        }
+                        catch
+                        {
+                            ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть положительным, целочисленным и отличаться от текущего количества мест в уровне.";
+                            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                            return View(edit_level);
+                        }
+                        if (AmountPlace < ap)
+                        {
 
 
 
 
 
-            levelzone edit_place_for_this_level = mp.levelzone.Where(x => x.id_location_level == id_location_level).FirstOrDefault();
-            return View(edit_place_for_this_level);
+
+
+                            ViewData["EditLevel"] = "Обрезка мест";
+
+
+
+
+
+                        }
+                        else
+                        {
+                            if (ChTariffForPlaces != null)
+                            {
+                                tariffonplace ac = mp.tariffonplace.Where(x => x.id_tariff_on_place == ChTariffForPlaces & x.Status == "Active").FirstOrDefault();
+                                if (ac != null)
+                                {
+
+                                    place ad_pl = new place();
+                                    string message = ad_pl.AddPlace(id_location_level, AmountPlace - ap, Status, (long)ChTariffForPlaces);
+                                    if (message != "")
+                                    {
+                                        ViewData["EditLevel"] = message;
+                                    }
+
+
+
+
+
+
+
+
+
+
+                                }
+                                else
+                                {
+                                    ViewData["EditLevel"] = "Выбранный тариф перестал быть активным";
+                                    ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                                    return View(edit_level);
+                                }
+                            }
+                            else
+                            {
+                                ViewData["EditLevel"] = "Необходимо задать тариф.";
+                                ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                                return View(edit_level);
+                            }
+                        }
+
+
+                    }
+                    else if (NewAmountPlaces == null & AddPlaces != null )
+                    {
+                        try
+                        {
+                            AddPlace = Convert.ToInt32(AddPlaces);
+                            if (AddPlace <= 0)
+                            {
+                                ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть больше нуля и целочисленным.";
+                                ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                                return View(edit_level);
+                            }
+                        }
+                        catch
+                        {
+                            ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть больше нуля и целочисленным.";
+                            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                            return View(edit_level);
+                        }
+
+                        if (ChTariffForPlaces != null)
+                        {
+                            tariffonplace ac = mp.tariffonplace.Where(x => x.id_tariff_on_place == ChTariffForPlaces & x.Status == "Active").FirstOrDefault();
+                            if (ac != null)
+                            {
+                                
+
+
+
+                                place ad_pl = new place();
+                                string message = ad_pl.AddPlace(id_location_level, AddPlace, Status, (long)ChTariffForPlaces);
+                                if (message != "")
+                                {
+                                    ViewData["EditLevel"] = message;
+                                }
+
+
+
+                            }
+                            else
+                            {
+                                ViewData["EditLevel"] = "Выбранный тариф перестал быть активным";
+                                ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                                return View(edit_level);
+                            }
+                        }
+                        else
+                        {
+                            ViewData["EditLevel"] = "Необходимо задать тариф.";
+                            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                            return View(edit_level);
+                        }
+
+                    }
+
+
+
+                
+                if (TariffForAllPlace == "True")
+                {
+                    if (ChTariffForPlaces != null)
+                    {
+                        tariffonplace ac = mp.tariffonplace.Where(x => x.id_tariff_on_place == ChTariffForPlaces & x.Status == "Active").FirstOrDefault();
+                        if (ac != null)
+                        {
+                            //int ap = mp.place.Count(x => x.id_location_level == id_location_level & x.Status != "Was replaced" & x.Status != "Disabled");
+                            if (ap != 0)
+                            {
+                                //Тогда обновить тариф для всех мест в уровне, причем так же с учетом брони
+                                var allplace = mp.place.Where(x => x.id_location_level == id_location_level & (x.Status == "Free" || x.Status == "Not working")).ToList();
+                                if (allplace != null)
+                                {
+                                    foreach (var ch in allplace)
+                                    {
+                                        reservation searchactiveres = mp.reservation.Where(x => x.id_location_place == ch.id_location_place & x.Status == "Active").FirstOrDefault();
+                                        if (searchactiveres != null)
+                                        {
+                                            ViewData["EditLevel"] = "Обновление тарифа не удалось применить ко всем местам.";
+                                        }
+                                        else
+                                        {
+                                            place thplace = mp.place.Where(x => x.id_location_level == ch.id_location_level & x.NumberPlace == ch.NumberPlace & x.Status == "Was replaced" & x.id_tariff_on_place == ChTariffForPlaces).FirstOrDefault();
+                                            if (thplace == null)
+                                            {
+                                                if (ch.id_tariff_on_place != ChTariffForPlaces)
+                                                {
+                                                    place place_new = new place();
+                                                    place_new.id_location_level = ch.id_location_level;
+                                                    place_new.id_tariff_on_place = (long)ChTariffForPlaces;
+                                                    place_new.Status = ch.Status;
+                                                    place_new.NumberPlace = ch.NumberPlace;
+                                                    place_new.id_alternative_tariff_on_place = ChTariffForPlaces;
+                                                    mp.place.Add(place_new);
+                                                    mp.SaveChanges();
+
+                                                    ch.Status = "Was replaced";
+                                                    mp.Entry(ch).State = EntityState.Modified;
+                                                    mp.SaveChanges();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                thplace.Status = ch.Status;
+                                                mp.Entry(thplace).State = EntityState.Modified;
+                                                mp.SaveChanges();
+
+                                                ch.Status = "Was replaced";
+                                                mp.Entry(ch).State = EntityState.Modified;
+                                                mp.SaveChanges();
+                                            }
+
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    ViewData["EditLevel"] = "Возможно, все места заняты и выполнить обновление тарифа невозможно. Рекомендуется выполнять обновление тарифа всех мест для временно недоступного уровня в целом";
+                                    ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                                    return View(edit_level);
+                                }
+                            }
+                            else
+                            {
+                                ViewData["EditLevel"] = "Количество мест в этом уровне не превышает нуля. Обновление запрещено.";
+                                ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                                return View(edit_level);
+                            }
+                        }
+                        else
+                        {
+                            ViewData["EditLevel"] = "Выбранный тариф перестал быть активным";
+                            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                            return View(edit_level);
+                        }
+                    }
+                    else
+                    {
+                        ViewData["EditLevel"] = "Необходимо задать тариф.";
+                        ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                        return View(edit_level);
+                    }
+
+                }
+
+                
+
+
+                /*  try
+                  {
+                      if (Convert.ToInt32(AmPlace) != null)
+                      {
+                          //посчитать количество добавляемых  мест и запустить тот же метод, что и для добавления мест к текущим.
+                          //Там я определю, что если мест вообще нет то начать с первого и до посчитанного числа.(или если AdPlace, то до уже указанного числа)
+                          //Если места будут то прибавить единичку к нумерации и начать как i=place+1 ; i<place+adplace;i++  place.Num=i и т.д.
+                      }
+
+                  }
+                  catch
+                  {
+                      ViewData["EditLevel"] = "Неверный формат ввода. При добавлении или задании нового количества мест необходимо вводить целочисленное значение.";
+                      ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+                      return View(edit_level);
+                  }
+                  // Определить обрезка или добавление мест
+                  */
+
+            }
+            else { ViewData["EditLevel"] = "Изменений не произошло."; }
+            ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
+            return View(edit_level);
         }
+
+
         /*
 
         //==========================================

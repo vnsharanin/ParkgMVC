@@ -31,12 +31,21 @@
                 Количество свободных мест
             </th>
         </tr>
-
+         <% ParkgMVC.Models.MyParkingEntities mp = new ParkgMVC.Models.MyParkingEntities();%>
     <% foreach (var item in Model) { %>
+                <%  int p = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status != "Was replaced" & x.Status != "Disabled");
+                    int freep = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Free");
+                    int disabled = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Was replaced" & x.Status == "Disabled");           
+                    ViewData["AmPl"] = p; ViewData["AmFreePl"] = freep;%>
 
+                    <!-- возможно & p != 0 из условия будет лучше убрать. Подумать над этим.-->
+
+            <% if (disabled == p & !User.IsInRole("Admin")) { }
+               else
+               { %>
         <tr>
                     <% if (User.IsInRole("Admin"))
-               { %>
+                       { %>
                 <td>
                  <% using (Html.BeginForm("Edit_a_p", "Home", FormMethod.Post))
                     {%>
@@ -47,7 +56,8 @@
                 </td> 
                  <% } %>
 
-                                <% using (Html.BeginForm("Places", "Home", FormMethod.Post)){%>
+                                <% using (Html.BeginForm("Places", "Home", FormMethod.Post))
+                                   {%>
             <input type="hidden" name="Value" id="Hidden1" value="<%: ViewData["Reservation"] %>" />
             <input type="hidden" name="zone" id="Hidden2" value="<%: item.Parking_zone %>" />
             <input type="hidden" name="level" id="Hidden3" value="<%: item.Level %>" />
@@ -55,27 +65,25 @@
             <input type="hidden" name="id_location_level" id="Hidden4" value="<%: item.id_location_level %>" />
 
                                                  <% if (User.IsInRole("Admin"))
-               { %>
+                                                    { %>
                 <td>
                 <%: Html.ActionLink("Delete", "Delete", new { id_location_level = item.id_location_level })%>
                  </td>
                   <% } %>
                
                 
-            <td>
-                                <input type="submit" name="Places" id="Select_level" value="Select_level" />
+            <td><% if (disabled != p) {%>
+                                <input type="submit" name="Places" id="Select_level" value="Select_level" /> <% } %>
             </td>
                       <% } %>
             <td>
-                <%: item.Level %>
+                <%: item.Level%>
             </td>
             <td>
                 <%: item.TypeLevel%>
             </td>
-                                  <% ParkgMVC.Models.MyParkingEntities mp = new ParkgMVC.Models.MyParkingEntities();
-                                     int p = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status != "Was replaced");
-                                     int freep = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Free");
-                                     ViewData["AmPl"] = p; ViewData["AmFreePl"] = freep;%>
+                                 
+                       
              <td> 
                 <%: ViewData["AmPl"]%>
             </td>
@@ -83,7 +91,7 @@
                 <%: ViewData["AmFreePl"]%>
             </td>
         </tr>
-
+        <% } %>
     <% } %>
 
     </table>
