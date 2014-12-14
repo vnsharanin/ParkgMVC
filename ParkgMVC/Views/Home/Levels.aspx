@@ -16,6 +16,7 @@
             { %>
             <th></th>
             <th></th>
+                        <th></th>
                 <% } %>
             <th></th>
             <th>
@@ -35,6 +36,7 @@
     <% foreach (var item in Model) { %>
                 <%  int p = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status != "Was replaced" & x.Status != "Disabled");
                     int freep = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Free");
+                    int notw = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Not working");
                     int disabled = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Was replaced" & x.Status == "Disabled");           
                     ViewData["AmPl"] = p; ViewData["AmFreePl"] = freep;%>
 
@@ -55,6 +57,27 @@
 
                 </td> 
                  <% } %>
+                                                 <% using (Html.BeginForm("Levels", "Home", FormMethod.Post))
+                                                    {%>
+                                                 <% if (User.IsInRole("Admin"))
+                                                    { %>
+            <input type="hidden" name="id_location_level" id="Hidden7" value="<%: item.id_location_level %>" />
+            <input type="hidden" name="Parking_zone" id="Hidden8" value="<%: item.Parking_zone %>" />
+                <td>
+          <% if (disabled != p) {%>     <input type="submit" name="Levels" id="Submit1" value="Disabled_level" /></td>
+        <td>  <% if (notw != p)
+             {%>
+           <input type="submit" name="Levels" id="Submit2" value="Temporarily_not_working" />
+          <% }
+                 if (freep != p)
+             { %>
+              <input type="submit" name="Levels" id="Submit3" value="Run_this_level" />
+          <% } %>
+           <% } %>
+                 </td>
+                  <% } %>
+               
+               <% } %>
 
                                 <% using (Html.BeginForm("Places", "Home", FormMethod.Post))
                                    {%>
@@ -64,13 +87,6 @@
             <input type="hidden" name="type_level" id="Hidden5" value="<%: item.TypeLevel %>" />
             <input type="hidden" name="id_location_level" id="Hidden4" value="<%: item.id_location_level %>" />
 
-                                                 <% if (User.IsInRole("Admin"))
-                                                    { %>
-                <td>
-                <%: Html.ActionLink("Delete", "Delete", new { id_location_level = item.id_location_level })%>
-                 </td>
-                  <% } %>
-               
                 
             <td><% if (disabled != p) {%>
                                 <input type="submit" name="Places" id="Select_level" value="Select_level" /> <% } %>

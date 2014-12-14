@@ -107,6 +107,65 @@ namespace ParkgMVC.Controllers
             ViewData["Zone"] = "Зона №" + Convert.ToString(Parking_zone);
 
             //Вернуть выборку по полученной зоне и значение ViewData
+            //Из представления вынести подсчет сюда. и если роль админ то вернуть строку которая ниже. если нет, то с ограничениями
+            //А именно те уровни, в которых кол-во мест не 0 по условию (!=disabled & !=Replaced)
+            return View(mp.levelzone.Where(x => x.Parking_zone == Parking_zone));
+        }
+
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Levels", MatchFormValue = "Temporarily_not_working")]
+        public ActionResult Temporarily_not_working(Int32 Parking_zone, Int32 id_location_level)
+        {
+            //Вернуть выборку по полученной зоне и значение ViewData
+            ViewData["Reservation"] = "";
+            ViewData["Zone"] = "Зона №" + Convert.ToString(Parking_zone);
+
+
+            place dis = new place();
+            ViewData["EditLevel"] = dis.Disable(id_location_level, 0, "Not working");
+
+            //Вернуть выборку по полученной зоне и значение ViewData
+            //Из представления вынести подсчет сюда. и если роль админ то вернуть строку которая ниже. если нет, то с ограничениями
+            //А именно те уровни, в которых кол-во мест не 0 по условию (!=disabled & !=Replaced)
+            return View(mp.levelzone.Where(x => x.Parking_zone == Parking_zone));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Levels", MatchFormValue = "Run_this_level")]
+        public ActionResult Run_this_level(Int32 Parking_zone, Int32 id_location_level)
+        {
+            //Вернуть выборку по полученной зоне и значение ViewData
+            ViewData["Reservation"] = "";
+            ViewData["Zone"] = "Зона №" + Convert.ToString(Parking_zone);
+            //Зоны запускать и выключать так же, только в цикле подставлять id_loca_level которые ей принадлежат и запускать уже написанные методы
+            
+            place runLev = new place();
+            ViewData["EditLevel"] = runLev.Run_this_level(id_location_level);
+            //ViewData["EditLevel"] = dis.Disable(id_location_level, 0, "Not working");
+
+            //Вернуть выборку по полученной зоне и значение ViewData
+            //Из представления вынести подсчет сюда. и если роль админ то вернуть строку которая ниже. если нет, то с ограничениями
+            //А именно те уровни, в которых кол-во мест не 0 по условию (!=disabled & !=Replaced)
+            return View(mp.levelzone.Where(x => x.Parking_zone == Parking_zone));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Levels", MatchFormValue = "Disabled_level")]
+        public ActionResult Disabled_level(Int32 Parking_zone, Int32 id_location_level)
+        {
+            //Вернуть выборку по полученной зоне и значение ViewData
+            ViewData["Reservation"] = "";
+            ViewData["Zone"] = "Зона №" + Convert.ToString(Parking_zone);
+
+
+            place dis = new place();
+            ViewData["EditLevel"] = dis.Disable(id_location_level, 0,"Disabled");
+
+
+            //Вернуть выборку по полученной зоне и значение ViewData
+            //Из представления вынести подсчет сюда. и если роль админ то вернуть строку которая ниже. если нет, то с ограничениями
+            //А именно те уровни, в которых кол-во мест не 0 по условию (!=disabled & !=Replaced)
             return View(mp.levelzone.Where(x => x.Parking_zone == Parking_zone));
         }
 
@@ -628,36 +687,32 @@ namespace ParkgMVC.Controllers
                         try
                         {
                             AmountPlace = Convert.ToInt32(NewAmountPlaces);
-                            if (AmountPlace < 0 || AmountPlace == ap)
+                            if (AmountPlace < 0) //|| AmountPlace == ap)
                             {
-                                ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть положительным, целочисленным и отличаться от текущего количества мест в уровне.";
+                                ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть положительным и целочисленным"; //+ отличаться от текущего количества мест в уровне.";
                                 ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
                                 return View(edit_level);
                             }
                         }
                         catch
                         {
-                            ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть положительным, целочисленным и отличаться от текущего количества мест в уровне.";
+                            ViewData["EditLevel"] = "Неверный формат ввода. Значение должно быть положительным и целочисленным"; //+ отличаться от текущего количества мест в уровне.";
                             ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
                             return View(edit_level);
                         }
-                        if (AmountPlace < ap)
+                        if (AmountPlace <= ap)
                         {
-
-
-
-
-
-
-
-                            ViewData["EditLevel"] = "Обрезка мест";
-
+                            //Если добавлять поле "Количество удаляемых мест из уровня, то в качестве параметра AmountPlace отсылать значение: ap-amount_delete_place
+                            //таким образом я как бы вновь получу новое количество мест, а это значит, что и номер последнего места.
+                            //ViewData["EditLevel"] = "Количество мест в уровне уменьшилось на " + Convert.ToString(ap-AmountPlace);
+                            place dis = new place();
+                            ViewData["EditLevel"] = dis.Disable(id_location_level, AmountPlace,"Disabled");
 
 
 
 
                         }
-                        else
+                        else if (AmountPlace > ap)
                         {
                             if (ChTariffForPlaces != null)
                             {
@@ -841,29 +896,6 @@ namespace ParkgMVC.Controllers
                     }
 
                 }
-
-                
-
-
-                /*  try
-                  {
-                      if (Convert.ToInt32(AmPlace) != null)
-                      {
-                          //посчитать количество добавляемых  мест и запустить тот же метод, что и для добавления мест к текущим.
-                          //Там я определю, что если мест вообще нет то начать с первого и до посчитанного числа.(или если AdPlace, то до уже указанного числа)
-                          //Если места будут то прибавить единичку к нумерации и начать как i=place+1 ; i<place+adplace;i++  place.Num=i и т.д.
-                      }
-
-                  }
-                  catch
-                  {
-                      ViewData["EditLevel"] = "Неверный формат ввода. При добавлении или задании нового количества мест необходимо вводить целочисленное значение.";
-                      ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
-                      return View(edit_level);
-                  }
-                  // Определить обрезка или добавление мест
-                  */
-
             }
             else { ViewData["EditLevel"] = "Изменений не произошло."; }
             ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");

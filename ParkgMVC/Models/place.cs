@@ -209,9 +209,116 @@ namespace ParkgMVC.Models
         }
 
 
-        public bool Disable(Int32 id_loc_level, Int32 amount_place)
+        public string Disable(Int32 id_loc_level, Int32 Last_place, string Status)
         {
-            bool Result = true;
+            string Result = "";
+
+            reservation expired = new reservation();
+            expired.FindOnExpired("");
+            place last = mp.place.Where(x => x.id_location_level == id_loc_level & x.Status != "Was replaced").OrderByDescending(x => x.NumberPlace).FirstOrDefault();
+
+            for (int i = Last_place + 1; i <= last.NumberPlace; i++)
+            {
+                place not_working_place = mp.place.Where(x => x.id_location_level == id_loc_level & x.NumberPlace == i & x.Status != "Was replaced").FirstOrDefault();
+                place change = new place();
+                if (not_working_place.Status != "Disabled" & not_working_place.Status != Status)
+                {
+                    if (not_working_place.Status != "Occupied")
+                    {
+                        if (not_working_place.Status == "In waiting visit")
+                        {
+                            change.ChangeStatus(Status, not_working_place.id_location_place, 0);
+                            reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == not_working_place.id_location_place || x.id_alternative_location_place == not_working_place.id_location_place)).FirstOrDefault();
+                            if (res != null)
+                            {
+                                place findmax;
+                                if (Last_place != 0)
+                                {
+                                    findmax = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement >= res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderBy(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                                }
+                                else
+                                {
+                                    findmax = mp.place.Where(x => x.id_location_level != id_loc_level & (x.tariffonplace.PriceForHourWithoutAbonement >= res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderBy(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                                }
+
+                                if (findmax != null)
+                                {
+                                    change.ChangeStatus("In waiting visit", (long)findmax.id_location_place, (int)res.place.id_tariff_on_place);
+                                    res.id_alternative_location_place = (int)findmax.id_location_place;
+                                    mp.Entry(res).State = EntityState.Modified;
+                                    mp.SaveChanges();
+                                }
+                                else if (findmax == null)
+                                {
+                                    place findmin;
+                                    if (Last_place != 0)
+                                    {
+                                        findmin = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement < res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderByDescending(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                                    }
+                                    else
+                                    {
+                                        findmin = mp.place.Where(x => x.id_location_level != id_loc_level & (x.tariffonplace.PriceForHourWithoutAbonement < res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderByDescending(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                                    }
+
+                                    if (findmin != null)
+                                    {
+                                        change.ChangeStatus("In waiting visit", (long)findmin.id_location_place, 0);
+                                        res.id_alternative_location_place = (int)findmin.id_location_place;
+                                        mp.Entry(res).State = EntityState.Modified;
+                                        mp.SaveChanges();
+                                    }
+                                    else
+                                    {
+                                        res.id_alternative_location_place = null;
+                                        mp.Entry(res).State = EntityState.Modified;
+                                        mp.SaveChanges();
+                                    }
+                                }
+                            }
+                        }
+                        else { change.ChangeStatus(Status, not_working_place.id_location_place, 0); }
+                    }
+                    else Result = "В связи с тем, что одно или более транспортных мест на данный момент находится на парковке, места были отключены не полностью...";
+                }
+            }
+
+            
+            return Result;
+        }
+
+        public string Run_this_level(Int32 id_loc_level)
+        {
+            string Result = "";
+            reservation expired = new reservation();
+            expired.FindOnExpired("");
+            int ap = mp.place.Count(x => x.id_location_level == id_loc_level & x.Status != "Was replaced" & x.Status != "Disabled");
+
+            for (int i = 0; i <= ap; i++)
+            {
+                place not_working_place = mp.place.Where(x => x.id_location_level == id_loc_level & x.NumberPlace == i & x.Status == "Not working").FirstOrDefault();
+                if (not_working_place != null)
+                {
+                    place change = new place();
+
+                    reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == not_working_place.id_location_place)).FirstOrDefault();
+                    if (res != null)
+                    {
+                        if (res.id_alternative_location_place != null)
+                        {
+                            change.FreePlace((long)res.id_alternative_location_place);
+                        }
+                        res.id_alternative_location_place = (int)not_working_place.id_location_place;
+                        mp.Entry(res).State = EntityState.Modified;
+                        mp.SaveChanges();
+                        change.ChangeStatus("In waiting visit", not_working_place.id_location_place, 0);
+                    }
+                    else
+                    {
+                        change.FreePlace((long)not_working_place.id_location_place);
+                    }
+                }
+            }
+
 
             return Result;
         }
@@ -239,7 +346,7 @@ namespace ParkgMVC.Models
                     if (res != null)
                     {
 
-                        if (Status == "Free")
+                        if (Status == "Free" & disabled.id_tariff_on_place == id_tariff_on_place)
                         {
                             if (res.id_alternative_location_place != null)
                             {
@@ -248,21 +355,29 @@ namespace ParkgMVC.Models
                             res.id_alternative_location_place = (int)disabled.id_location_place;
                             mp.Entry(res).State = EntityState.Modified;
                             mp.SaveChanges();
-                            // change.ChangeStatus("In waiting visit", disabled.id_location_place, 0);
-                            //Т.е. админ должен потом решить включить ли то место с тем тарифом или ждать пока бронь кончится,
+                            change.ChangeStatus("In waiting visit", disabled.id_location_place, 0);
+                            
+                            //Т.е. админ должен потом решить включить ли то место с со СТАРЫМ тарифом или ждать пока бронь кончится,
                             //а потом как доступ к изменению тарифу будет открыт(как закончится бронь) он его изменит и включит.
-                            change.ChangeStatus("Not working", disabled.id_location_place, 0);
-                            Result = "0";
+                            //Совпадающий тариф учитывается
                         }
-                        else
+                        else if (Status == "Free" & disabled.id_tariff_on_place != id_tariff_on_place)
+                        {
+                                change.ChangeStatus("Not working", disabled.id_location_place, 0);
+                                Result = "0";
+                        }
+                        if (Status != "Free" & disabled.id_tariff_on_place != id_tariff_on_place)
                         {
                             if (Result != "0")
                             {
                                 Result = "1";
                             }
-                            change.ChangeStatus(Status, disabled.id_location_place, 0);
+                            change.ChangeStatus("Not working", disabled.id_location_place, 0);
                         }
-                                               
+                        else if (Status != "Free" & disabled.id_tariff_on_place == id_tariff_on_place)
+                        {
+                            change.ChangeStatus("Not working", disabled.id_location_place, 0);
+                        }
                     }
                     else
                     {
@@ -289,7 +404,8 @@ namespace ParkgMVC.Models
                     mp.SaveChanges();
                     if (Status == "Free")
                     {
-                        change.FreePlace((long)disabled.id_location_place);
+                        place new_place_search = mp.place.Where(x => x.NumberPlace == i & x.Status == Status & x.id_tariff_on_place == id_tariff_on_place & x.id_location_level == id_loc_level & x.id_alternative_tariff_on_place == (int)id_tariff_on_place).FirstOrDefault();
+                        change.FreePlace((long)new_place_search.id_location_place);
                     }
                 }
             }
