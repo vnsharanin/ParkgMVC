@@ -137,8 +137,15 @@
 
 
 
+<% if (ap == 0)
+   { %>
+<input type="checkbox" id="TariffForAllPlace" disabled="true" name="TariffForAllPlace" value="True" />Изменить тариф для всех мест уровня</>
+<% }
+   else
+   { %>
+   <input type="checkbox" id="Checkbox1" name="TariffForAllPlace" value="True" />Изменить тариф для всех мест уровня</>
 
-<input type="checkbox" id="TariffForAllPlace" name="TariffForAllPlace" value="True" />Изменить тариф для всех мест уровня</>
+<%} %>
 </div>
 <br />
            <br />

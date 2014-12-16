@@ -16,7 +16,9 @@
     <h2>Тарифы, активные на текущий момент</h2>
     <table>
         <tr>
-            <th></th>
+                        <% if (User.IsInRole("Admin"))
+                   { %>
+            <th></th>        <%} %>
             <th>
                 Name_tariff_on_abonement
             </th>
@@ -39,19 +41,23 @@
                        {%>
             <input type="hidden" name="Name_tariff" id="Hidden" value="<%: item.Name_tariff_on_abonement %>" />
         <tr>
-            <td>
+            
             <% if (ViewData["Choose"] == "ВЫБОР АБОНЕМЕНТА")
                {%>
-
+                <td>
                 <input type="submit" name="TariffsOnAbonements" id="Connect_abonement" value="Connect_abonement"  />
-
+                 </td>
                 <% } %>
+                <%} %>
+                                    <% using (Html.BeginForm("Change_abonement", "Tariffs", FormMethod.Post))
+                       {%>            <input type="hidden" name="Name_tariff" id="Hidden2" value="<%: item.Name_tariff_on_abonement %>" />
                             <% if (User.IsInRole("Admin"))
-               { %>
-                <input type="submit" name="TariffsOnAbonements" id="Submit1" value="Off_abonement"  />
-               <input type="submit" name="TariffsOnAbonements" id="Submit2" value="Change_abonement"  />
-                <% }%>
-            </td>
+               { %><td>
+                <input type="submit" name="Change_abonement" id="Submit1" value="Off_abonement"  />
+               <input type="submit" name="Change_abonement" id="Submit2" value="Change_abonement"  />
+                </td> <% } }%>
+                
+            
             <td>
                 <%: item.Name_tariff_on_abonement%>
             </td>
@@ -68,13 +74,17 @@
                 <%: item.Status%>
             </td>
         </tr>
-    <%} %>
+  
     <% } %>
 
     </table>  
-     <p>
-        <%: Html.ActionLink("Create New", "Create") %>
-    </p>
+                    <% if (User.IsInRole("Admin"))
+                       { %>
+                       <br />
+                             <% using (Html.BeginForm("Create_abonement", "Tariffs", FormMethod.Post))
+                                {%>
+                     <input type="submit" name="Create_abonement" id="Submit4" value="Create_abonement" /><% }
+                       } %>
     </fieldset>
                 <% if (ViewData["Choose"] != "ВЫБОР АБОНЕМЕНТА")
                    {%>
@@ -106,12 +116,15 @@
     
         <tr>
          <% if (User.IsInRole("Admin"))
-               { %>
-            <td>
-                           
-                <input type="submit" name="TariffsOnAbonements" id="Submit3" value="Run_abonement"  />
+            { %>
+                <% using (Html.BeginForm("Change_abonement", "Tariffs", FormMethod.Post))
+                                       {%>
+            <td>                
+                                       <input type="hidden" name="Name_tariff" id="Hidden1" value="<%: item.Name_tariff_on_abonement %>" />
+                <input type="submit" name="Change_abonement" id="Submit3" value="Activate_abonement"  />
                 
-            </td><% }%>
+            </td><% }
+            }%>
             <td>
                 <%: item.Name_tariff_on_abonement%>
             </td>

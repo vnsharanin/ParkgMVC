@@ -32,7 +32,14 @@ namespace ParkgMVC.Controllers
             if (Value != "RESERVATION")
             {
                 ViewData["Reservation"] = "";
-                return View(mp.parkingzone.ToList());
+                ViewDataSelectList("");
+
+
+
+                //Для админа возможно будет лучше подсветить сколько каких зон у каждого типа!
+
+
+                return View(mp.parkingzone.OrderBy(x=>x.Parking_zone).ToList());
             }
             else
             {
@@ -69,10 +76,436 @@ namespace ParkgMVC.Controllers
                 {
                     return RedirectToAction("LogOn", new { Controller = "Account" });
                 }
-
-
             }
         }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "ZonesLevelsPlaces", MatchFormValue = "Apply")]
+        public ActionResult Apply(string NewAmountZones, string AddZones, string Type_zone,string Address)
+        {
+            ViewData["Apply"] = "Изменения прошли успешно";
+            ViewDataSelectList("");
+            
+                Int32 AmountZones = 0;
+                Int32 AddZone = 0;
+                int ap = mp.parkingzone.Count(x =>x.type_parking.Name==Type_zone);
+                type_parking name = mp.type_parking.Where(x => x.Name == Type_zone).FirstOrDefault();
+            //позже учесть если не исчез, т.е. не null
+
+                if (NewAmountZones == null & AddZones == null)
+                {
+                    ViewData["Apply"] = "Изменений не произошло.";
+                    return View(mp.parkingzone.ToList());
+                }
+
+
+                if (NewAmountZones != null & AddZones == null)
+                    {
+                        try
+                        {
+                            AmountZones = Convert.ToInt32(NewAmountZones);
+                            if (AmountZones < 0) //|| AmountPlace == ap)
+                            {
+                                ViewData["Apply"] = "Неверный формат ввода. Значение должно быть положительным и целочисленным"; //+ отличаться от текущего количества мест в уровне.";
+                                return View(mp.parkingzone.ToList());
+                            }
+                        }
+                        catch
+                        {
+                            ViewData["Apply"] = "Неверный формат ввода. Значение должно быть положительным и целочисленным"; //+ отличаться от текущего количества мест в уровне.";
+                            return View(mp.parkingzone.ToList());
+                        }
+                        if (AmountZones <= ap)
+                        {
+                            //Если добавлять поле "Количество удаляемых мест из уровня, то в качестве параметра AmountPlace отсылать значение: ap-amount_delete_place
+                            //таким образом я как бы вновь получу новое количество мест, а это значит, что и номер последнего места.
+                            //ViewData["EditLevel"] = "Количество мест в уровне уменьшилось на " + Convert.ToString(ap-AmountPlace);
+                            //place dis = new place();
+                            ViewData["Apply"] = "Функция обрезания количества уровней временно недоступна";//dis.Disable(id_location_level, AmountPlace, "Disabled");
+                            return View(mp.parkingzone.ToList());
+
+
+
+                        }
+                        else if (AmountZones > ap)
+                        {
+
+                            parkingzone lz = mp.parkingzone.OrderByDescending(x => x.Parking_zone).FirstOrDefault();
+                            if (lz != null)
+                            {
+                                for (int i = lz.Parking_zone + 1; i <= (lz.Parking_zone+AmountZones-ap); i++)
+                                {
+                                    parkingzone nl = new parkingzone();
+                                    nl.Parking_zone = i;
+                                    nl.id_type = name.id_type;
+                                    nl.Address = Address;
+                                    mp.parkingzone.Add(nl);
+                                    mp.SaveChanges();
+                                }
+                            }
+                            else
+                            {
+                                //с единицы
+                                for (int i = 1; i <= AmountZones; i++)
+                                {
+                                    parkingzone nl = new parkingzone();
+                                    nl.Parking_zone = i;
+                                    nl.id_type = name.id_type;
+                                    nl.Address = Address;
+                                    mp.parkingzone.Add(nl);
+                                    mp.SaveChanges();
+                                }
+                            }
+
+                        }
+
+
+                    }
+                else if (NewAmountZones == null & AddZones != null)
+                    {
+                        try
+                        {
+                            AddZone = Convert.ToInt32(AddZones);
+                            if (AddZone <= 0)
+                            {
+                                ViewData["Apply"] = "Неверный формат ввода. Значение должно быть больше нуля и целочисленным.";
+                                return View(mp.parkingzone.ToList());
+                            }
+                        }
+                        catch
+                        {
+                            ViewData["Apply"] = "Неверный формат ввода. Значение должно быть больше нуля и целочисленным.";
+                            return View(mp.parkingzone.ToList());
+                        }
+
+
+                        parkingzone lz = mp.parkingzone.OrderByDescending(x => x.Parking_zone).FirstOrDefault();
+                        if (lz != null)
+                        {
+                            for (int i = lz.Parking_zone + 1; i <= lz.Parking_zone + AddZone; i++)
+                            {
+                                parkingzone nl = new parkingzone();
+                                nl.Parking_zone = i;
+                                nl.id_type = name.id_type;
+                                nl.Address = Address;
+                                mp.parkingzone.Add(nl);
+                                mp.SaveChanges();
+                            }
+                        }
+                        else
+                        {
+                            //с единицы
+                            for (int i = 1; i <= AddZone; i++)
+                            {
+                                parkingzone nl = new parkingzone();
+                                nl.Parking_zone = i;
+                                nl.id_type = name.id_type;
+                                nl.Address = Address;
+                                mp.parkingzone.Add(nl);
+                                mp.SaveChanges();
+                            }
+                        }
+                    }
+
+                return View(mp.parkingzone.ToList());
+        } 
+
+        public ActionResult Edit_zone()
+        {
+
+            return RedirectToAction("ZonesLevelsPlaces");
+        }
+        
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Edit_zone", MatchFormValue = "Edit_zone")]
+        public ActionResult Edit_zone(Int32 Parking_zone)
+        {
+            parkingzone pz = mp.parkingzone.Where(x => x.Parking_zone == Parking_zone).FirstOrDefault();
+            ViewDataSelectList(pz.type_parking.Name);
+            return View(pz);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Edit_zone", MatchFormValue = "Change_zone")]
+        public ActionResult Change_zone(parkingzone chpz, Int32 P_z, string Type_zone, string NewAmountLevels, string AddLevels, string Type_lev)
+        {
+            //В случае успеха можно вернуть
+            // return RedirectToAction("ZonesLevelsPlaces", new { Value = "" });
+            parkingzone pz = mp.parkingzone.Where(x => x.Parking_zone == P_z).FirstOrDefault();
+            if (Type_zone != null)
+            {
+                if (ModelState.IsValid)
+                {
+
+
+
+
+
+
+
+
+
+
+                Int32 AmountLevels = 0;
+                Int32 AddLevel = 0;
+                int ap = mp.levelzone.Count(x =>x.Parking_zone== P_z & x.TypeLevel == Type_lev);
+
+
+                if (pz.Address == chpz.Address & Type_zone == pz.type_parking.Name & NewAmountLevels == null & AddLevels == null)
+                {
+                    ViewData["EditZone1"] = "Изменений не произошло.";
+                }
+                else
+                {
+                    type_parking tp = mp.type_parking.Where(t => t.Name == Type_zone).FirstOrDefault();
+                    pz.id_type = tp.id_type;
+                    pz.Address = chpz.Address;
+                    mp.Entry(pz).State = EntityState.Modified;
+                    mp.SaveChanges();
+                    ViewData["EditZone1"] = "Информация о зоне обновлена.";
+                }
+
+                    
+                    if (NewAmountLevels != null  & AddLevels == null)
+                    {
+                        try
+                        {
+                            AmountLevels = Convert.ToInt32(NewAmountLevels);
+                            if (AmountLevels < 0) //|| AmountPlace == ap)
+                            {
+                                ViewData["EditZone2"] = "Неверный формат ввода. Значение должно быть положительным и целочисленным"; //+ отличаться от текущего количества мест в уровне.";
+                            }
+                        }
+                        catch
+                        {
+                            ViewData["EditZone2"] = "Неверный формат ввода. Значение должно быть положительным и целочисленным"; //+ отличаться от текущего количества мест в уровне.";
+                        }
+                        if (AmountLevels <= ap)
+                        {
+                            //Если добавлять поле "Количество удаляемых мест из уровня, то в качестве параметра AmountPlace отсылать значение: ap-amount_delete_place
+                            //таким образом я как бы вновь получу новое количество мест, а это значит, что и номер последнего места.
+                            //ViewData["EditLevel"] = "Количество мест в уровне уменьшилось на " + Convert.ToString(ap-AmountPlace);
+                            //place dis = new place();
+                            ViewData["EditZone2"] = "Функция обрезания количества уровней временно недоступна";//dis.Disable(id_location_level, AmountPlace, "Disabled");
+
+
+
+
+                        }
+                        else if (AmountLevels > ap)
+                        {
+
+                            levelzone lz = mp.levelzone.Where(x => x.TypeLevel == Type_lev & x.Parking_zone == P_z).OrderByDescending(x => x.Level).FirstOrDefault();
+                            if (lz != null)
+                            {
+                                for (int i = lz.Level + 1; i <= AmountLevels; i++)
+                                {
+                                    levelzone nl = new levelzone();
+                                    nl.Level = i;
+                                    nl.Parking_zone = P_z;
+                                    nl.TypeLevel = Type_lev;
+                                    mp.levelzone.Add(nl);
+                                    mp.SaveChanges();
+                                }
+                            }
+                            else
+                            {
+                                //с единицы
+                                for (int i = 1; i <= AmountLevels; i++)
+                                {
+                                    levelzone nl = new levelzone();
+                                    nl.Level = i;
+                                    nl.Parking_zone = P_z;
+                                    nl.TypeLevel = Type_lev;
+                                    mp.levelzone.Add(nl);
+                                    mp.SaveChanges();
+                                }
+                            }
+
+                                   /* place ad_pl = new place();
+                                    string message = ad_pl.AddPlace(id_location_level, AmountPlace - ap, Status, (long)ChTariffForPlaces);
+                                    if (message != "")
+                                    {
+                                        ViewData["EditZone2"] = message;
+                                    }*/
+
+
+
+                        }
+
+
+                    }
+                    else if (NewAmountLevels == null & AddLevels != null)
+                    {
+                        try
+                        {
+                            AddLevel = Convert.ToInt32(AddLevels);
+                            if (AddLevel <= 0)
+                            {
+                                ViewData["EditZone2"] = "Неверный формат ввода. Значение должно быть больше нуля и целочисленным.";
+                            }
+                        }
+                        catch
+                        {
+                            ViewData["EditZone2"] = "Неверный формат ввода. Значение должно быть больше нуля и целочисленным.";
+                        }
+
+
+                        levelzone lz = mp.levelzone.Where(x => x.TypeLevel == Type_lev & x.Parking_zone == P_z).OrderByDescending(x => x.Level).FirstOrDefault();
+                        if (lz != null)
+                        {
+                            for (int i = lz.Level + 1; i <= lz.Level + AddLevel; i++)
+                            {
+                                levelzone nl = new levelzone();
+                                nl.Level = i;
+                                nl.Parking_zone = P_z;
+                                nl.TypeLevel = Type_lev;
+                                mp.levelzone.Add(nl);
+                                mp.SaveChanges();
+                            }
+                        }
+                        else
+                        {
+                            //с единицы
+                            for (int i = 1; i <= AddLevel; i++)
+                            {
+                                levelzone nl = new levelzone();
+                                nl.Level = i;
+                                nl.Parking_zone = P_z;
+                                nl.TypeLevel = Type_lev;
+                                mp.levelzone.Add(nl);
+                                mp.SaveChanges();
+                            }
+                        }
+
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                }
+                else
+                {
+                    ViewDataSelectList(pz.type_parking.Name);
+                    return View(pz);
+                }
+            }
+            else ViewData["EditZone1"] = "Не задан тип парковочной зоны!";
+            ViewDataSelectList(pz.type_parking.Name);
+            return View(pz);
+        }
+
+        protected bool ViewDataSelectList(string Name)
+        {
+            var Type_Zone = mp.type_parking.ToList();
+            ViewData["Type_zone"] = new SelectList(Type_Zone, "Name", "Name",Name);
+            return Type_Zone.Count() > 0;
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "ZonesLevelsPlaces", MatchFormValue = "Disabled_zone")]
+        public ActionResult Disabled_zone(Int32 Parking_zone)
+        {
+            var levels = mp.levelzone.Where(x => x.Parking_zone == Parking_zone).ToList();
+            string Mes = "";
+            if (levels != null)
+            {
+                foreach (var lev in levels)
+                {
+                    if (mp.place.Where(x => x.id_location_level == lev.id_location_level).FirstOrDefault() != null)
+                    {
+                        place dis = new place();
+                        if (Mes == "")
+                        {
+                            Mes = dis.Disable((int)lev.id_location_level, 0, "Disabled");
+                        }
+                        else
+                        {
+                            dis.Disable((int)lev.id_location_level, 0, "Disabled");
+                        }
+                    }
+                }
+            }
+            if (Mes != "")
+            {
+                ViewData["EditZone1"] = "В связи с тем, что одно или более транспортных мест на данный момент находится на этой зоне парковки, места в уровнях на которых находятся эти ТС были отключены не полностью соответственно...";
+            }
+            return View(mp.parkingzone.ToList());
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "ZonesLevelsPlaces", MatchFormValue = "Temporarily_not_working_zone")]
+        public ActionResult Temporarily_not_working_zone(Int32 Parking_zone)
+        {
+            var levels = mp.levelzone.Where(x => x.Parking_zone == Parking_zone).ToList();
+            string Mes = "";
+            if (levels != null)
+            {
+                foreach (var lev in levels)
+                {
+                    if (mp.place.Where(x => x.id_location_level == lev.id_location_level).FirstOrDefault() != null)
+                    {
+                        place dis = new place();
+                        if (Mes == "")
+                        {
+                            dis.Disable((Int32)lev.id_location_level, 0, "Not working");
+                        }
+                        else
+                        {
+                            dis.Disable((Int32)lev.id_location_level, 0, "Not working");
+                        }
+                    }
+                }
+            }
+            if (Mes != "")
+            {
+                ViewData["EditZone1"] = "В связи с тем, что одно или более транспортных мест на данный момент находится на этой зоне парковки, места в уровнях на которых находятся эти ТС были отключены не полностью соответственно...";
+            }
+            return View(mp.parkingzone.ToList());
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "ZonesLevelsPlaces", MatchFormValue = "Run_this_zone")]
+        public ActionResult Run_this_zone(Int32 Parking_zone)
+        {
+
+            var levels = mp.levelzone.Where(x => x.Parking_zone == Parking_zone).ToList();
+            string Mes = "";
+            if (levels != null)
+            {
+                foreach (var lev in levels)
+                {
+                    if (mp.place.Where(x => x.id_location_level == lev.id_location_level).FirstOrDefault() != null)
+                    {
+                        place runLev = new place();
+                        if (Mes == "")
+                        {
+                            Mes = runLev.Run_this_level((Int32)lev.id_location_level);
+                        }
+                        else
+                        {
+                            runLev.Run_this_level((Int32)lev.id_location_level);
+                        }
+                    }
+                }
+            }
+                ViewData["EditZone1"] = Mes;
+            return View(mp.parkingzone.ToList());
+        }
+
+
+
 
 
 
@@ -109,7 +542,7 @@ namespace ParkgMVC.Controllers
             //Вернуть выборку по полученной зоне и значение ViewData
             //Из представления вынести подсчет сюда. и если роль админ то вернуть строку которая ниже. если нет, то с ограничениями
             //А именно те уровни, в которых кол-во мест не 0 по условию (!=disabled & !=Replaced)
-            return View(mp.levelzone.Where(x => x.Parking_zone == Parking_zone));
+            return View(mp.levelzone.Where(x => x.Parking_zone == Parking_zone).OrderBy(x=>x.Level).OrderBy(x=>x.TypeLevel));
         }
 
 
@@ -441,43 +874,46 @@ namespace ParkgMVC.Controllers
             expired.FindOnExpired("");
 
             place not_working_place = mp.place.Where(x => x.id_location_place == id_loc_pl).FirstOrDefault();
-            place change = new place();
 
-            if (not_working_place.Status == "In waiting visit")
-            {
-                change.ChangeStatus("Not working", id_loc_pl, 0);
-                reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == id_loc_pl || x.id_alternative_location_place == id_loc_pl)).FirstOrDefault();
-                if (res != null)
+
+
+                place change = new place();
+
+                if (not_working_place.Status != "In waiting visit")
                 {
-                    place findmax = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement >= res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderBy(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
-                    if (findmax != null)
+                    change.ChangeStatus("Not working", id_loc_pl, 0);
+                    reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == id_loc_pl || x.id_alternative_location_place == id_loc_pl)).FirstOrDefault();
+                    if (res != null)
                     {
-                        change.ChangeStatus("In waiting visit", (long)findmax.id_location_place, (int)res.place.id_tariff_on_place);
-                        res.id_alternative_location_place = (int)findmax.id_location_place;
-                        mp.Entry(res).State = EntityState.Modified;
-                        mp.SaveChanges();
-                    }
-                    else if (findmax == null)
-                    {
-                        place findmin = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement < res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderByDescending(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
-                        if (findmin != null)
+                        place findmax = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement >= res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderBy(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                        if (findmax != null)
                         {
-                            change.ChangeStatus("In waiting visit", (long)findmin.id_location_place, 0);
-                            res.id_alternative_location_place = (int)findmin.id_location_place;
+                            change.ChangeStatus("In waiting visit", (long)findmax.id_location_place, (int)res.place.id_tariff_on_place);
+                            res.id_alternative_location_place = (int)findmax.id_location_place;
                             mp.Entry(res).State = EntityState.Modified;
                             mp.SaveChanges();
                         }
-                        else
+                        else if (findmax == null)
                         {
-                            res.id_alternative_location_place = null;
-                            mp.Entry(res).State = EntityState.Modified;
-                            mp.SaveChanges();
+                            place findmin = mp.place.Where(x => (x.tariffonplace.PriceForHourWithoutAbonement < res.place.tariffonplace.PriceForHourWithoutAbonement) & x.Status == "Free").OrderByDescending(x => x.tariffonplace.PriceForHourWithAbonement).FirstOrDefault();
+                            if (findmin != null)
+                            {
+                                change.ChangeStatus("In waiting visit", (long)findmin.id_location_place, 0);
+                                res.id_alternative_location_place = (int)findmin.id_location_place;
+                                mp.Entry(res).State = EntityState.Modified;
+                                mp.SaveChanges();
+                            }
+                            else
+                            {
+                                res.id_alternative_location_place = null;
+                                mp.Entry(res).State = EntityState.Modified;
+                                mp.SaveChanges();
+                            }
                         }
                     }
                 }
-            }
-            else { change.ChangeStatus("Not working", id_loc_pl, 0); }
-
+                else { change.ChangeStatus("Not working", id_loc_pl, 0); }
+            
             //& (x.Status == "Free" || x.Status == "Not working" || x.Status == "In waiting visit")
             ViewData["Reservation"] = "";
             ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_place.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_place.levelzone.Level) + " ; Тип уровня: " + not_working_place.levelzone.TypeLevel;
@@ -494,23 +930,27 @@ namespace ParkgMVC.Controllers
             reservation expired = new reservation();
             expired.FindOnExpired("");
             place not_working_place = mp.place.Where(x => x.id_location_place == id_loc_pl).FirstOrDefault();
-            place change = new place();
-            
-            reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == id_loc_pl)).FirstOrDefault();
-            if (res != null)
+
+            if (not_working_place.Status == "Not working")
             {
-                if (res.id_alternative_location_place != null)
+                place change = new place();
+
+                reservation res = mp.reservation.Where(x => x.Status == "Active" & (x.id_location_place == id_loc_pl)).FirstOrDefault();
+                if (res != null)
                 {
-                    change.FreePlace((long)res.id_alternative_location_place);
+                    if (res.id_alternative_location_place != null)
+                    {
+                        change.FreePlace((long)res.id_alternative_location_place);
+                    }
+                    res.id_alternative_location_place = id_loc_pl;
+                    mp.Entry(res).State = EntityState.Modified;
+                    mp.SaveChanges();
+                    change.ChangeStatus("In waiting visit", id_loc_pl, 0);
                 }
-                res.id_alternative_location_place = id_loc_pl;
-                mp.Entry(res).State = EntityState.Modified;
-                mp.SaveChanges();
-                change.ChangeStatus("In waiting visit", id_loc_pl, 0); 
-            }
-            else
-            {
-                change.FreePlace((long)id_loc_pl);
+                else
+                {
+                    change.FreePlace((long)id_loc_pl);
+                }
             }
             ViewData["Reservation"] = "";
             ViewData["Zone-Level"] = "Зона №" + Convert.ToString(not_working_place.levelzone.Parking_zone) + " ; Уровень:" + Convert.ToString(not_working_place.levelzone.Level) + " ; Тип уровня: " + not_working_place.levelzone.TypeLevel;           
@@ -666,7 +1106,6 @@ namespace ParkgMVC.Controllers
                 Int32 AddPlace = 0;
                 int ap = mp.place.Count(x => x.id_location_level == id_location_level & x.Status != "Was replaced" & x.Status != "Disabled");
 
-
                     if (ChTariffForPlaces != null & NewAmountPlaces == null & AddPlaces == null & TariffForAllPlace != "True")
                     {
                         ViewData["EditLevel"] = "Выбирая тариф необходимо выбрать как его применить, а именно, либо ко всем местам уровня (поставив соответсвующую галочку), либо задать новое или добавляемое количество мест. Причем, задавая новое количество мест меньше текущего количества, выбранный тариф проигнорируется соответственно.";
@@ -818,53 +1257,77 @@ namespace ParkgMVC.Controllers
                         tariffonplace ac = mp.tariffonplace.Where(x => x.id_tariff_on_place == ChTariffForPlaces & x.Status == "Active").FirstOrDefault();
                         if (ac != null)
                         {
-                            //int ap = mp.place.Count(x => x.id_location_level == id_location_level & x.Status != "Was replaced" & x.Status != "Disabled");
+                            //int apo = mp.place.Count(x => x.id_location_level == id_location_level & x.Status != "Was replaced" & x.Status != "Disabled"); 
                             if (ap != 0)
                             {
                                 //Тогда обновить тариф для всех мест в уровне, причем так же с учетом брони
-                                var allplace = mp.place.Where(x => x.id_location_level == id_location_level & (x.Status == "Free" || x.Status == "Not working")).ToList();
+                                var allplace = mp.place.Where(x => x.id_location_level == id_location_level & x.Status != "Was replaced" & x.Status != "Disabled").ToList();
                                 if (allplace != null)
                                 {
+                                    string Mes = "";
+                                    string Mes2 = "";
                                     foreach (var ch in allplace)
                                     {
-                                        reservation searchactiveres = mp.reservation.Where(x => x.id_location_place == ch.id_location_place & x.Status == "Active").FirstOrDefault();
-                                        if (searchactiveres != null)
+                                        if (ch.Status != "Occupied")
                                         {
-                                            ViewData["EditLevel"] = "Обновление тарифа не удалось применить ко всем местам.";
-                                        }
-                                        else
-                                        {
-                                            place thplace = mp.place.Where(x => x.id_location_level == ch.id_location_level & x.NumberPlace == ch.NumberPlace & x.Status == "Was replaced" & x.id_tariff_on_place == ChTariffForPlaces).FirstOrDefault();
-                                            if (thplace == null)
+                                            reservation searchactiveres = mp.reservation.Where(x => x.id_location_place == ch.id_location_place & x.Status == "Active").FirstOrDefault();
+                                            if (searchactiveres != null)
                                             {
-                                                if (ch.id_tariff_on_place != ChTariffForPlaces)
+                                                if (searchactiveres.place.id_tariff_on_place != ChTariffForPlaces)
                                                 {
-                                                    place place_new = new place();
-                                                    place_new.id_location_level = ch.id_location_level;
-                                                    place_new.id_tariff_on_place = (long)ChTariffForPlaces;
-                                                    place_new.Status = ch.Status;
-                                                    place_new.NumberPlace = ch.NumberPlace;
-                                                    place_new.id_alternative_tariff_on_place = ChTariffForPlaces;
-                                                    mp.place.Add(place_new);
+                                                   Mes = "Обновление тарифа для любого забронированного расположения запрещено даже если место временно не доступно.";
+                                                }
+                                            }
+                                            else
+                                            {
+                                                place thplace = mp.place.Where(x => x.id_location_level == ch.id_location_level & x.NumberPlace == ch.NumberPlace & x.Status == "Was replaced" & x.id_tariff_on_place == ChTariffForPlaces).FirstOrDefault();
+                                                if (thplace == null)
+                                                {
+                                                    if (ch.id_tariff_on_place != ChTariffForPlaces)
+                                                    {
+                                                        place place_new = new place();
+                                                        place_new.id_location_level = ch.id_location_level;
+                                                        place_new.id_tariff_on_place = (long)ChTariffForPlaces;
+                                                        place_new.Status = ch.Status;
+                                                        place_new.NumberPlace = ch.NumberPlace;
+                                                        place_new.id_alternative_tariff_on_place = ChTariffForPlaces;
+                                                        mp.place.Add(place_new);
+                                                        mp.SaveChanges();
+
+                                                        ch.Status = "Was replaced";
+                                                        mp.Entry(ch).State = EntityState.Modified;
+                                                        mp.SaveChanges();
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    thplace.Status = ch.Status;
+                                                    mp.Entry(thplace).State = EntityState.Modified;
                                                     mp.SaveChanges();
 
                                                     ch.Status = "Was replaced";
                                                     mp.Entry(ch).State = EntityState.Modified;
                                                     mp.SaveChanges();
                                                 }
-                                            }
-                                            else
-                                            {
-                                                thplace.Status = ch.Status;
-                                                mp.Entry(thplace).State = EntityState.Modified;
-                                                mp.SaveChanges();
 
-                                                ch.Status = "Was replaced";
-                                                mp.Entry(ch).State = EntityState.Modified;
-                                                mp.SaveChanges();
                                             }
-
                                         }
+                                        else
+                                        {
+                                            Mes2 = "Обновление тарифа запрещено для расположений на которых простаивает транспортное средство.";
+                                        }
+                                    }
+                                    if (Mes2 == "")
+                                    {
+                                        ViewData["EditLevel"] = Mes;
+                                    }
+                                    else if (Mes2 != "")
+                                    {
+                                        ViewData["EditLevel"] = Mes2;
+                                    }
+                                    if (Mes != "" & Mes2 != "")
+                                    {
+                                        ViewData["EditLevel"] = "Обновление выполнено частично, т.к. 1." + Mes + " 2." + Mes2;
                                     }
                                 }
                                 else
@@ -896,87 +1359,12 @@ namespace ParkgMVC.Controllers
                     }
 
                 }
+
             }
             else { ViewData["EditLevel"] = "Изменений не произошло."; }
             ViewData["ActiveTariffs"] = mp.tariffonplace.Where(x => x.Status == "Active");
             return View(edit_level);
         }
-
-
-        /*
-
-        //==========================================
-
-        public ActionResult EL(string Parking_zone, string Levels, string Address)
-        {
-            return View();
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult EL(string Parking_zone, parkingzones visits)
-        {
-            try
-            {
-                if (lz.EditLev(Parking_zone, visits))
-                    return RedirectToAction("ZonesLevelsPlaces");
-                else
-                    return View("EditLev");
-            }
-            catch
-            {
-                return View("EditLev");
-            }
-        }
-
-        //============================================
-
-
-        public ActionResult VISIT()
-        {
-            string Log = User.Identity.Name.ToString();
-            return View(recordsVISITS.VISIT(Log));
-        }
-
-        public ActionResult CreateVISIT()
-        {
-            return View();
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult CreateVISIT(visit vis)
-        {
-            try
-            {
-                if (recordsVISITS.RegInTS(vis))
-                    return RedirectToAction("VISIT");
-                else
-                    return View("CreateVISIT");
-            }
-            catch
-            {
-                return View("CreateVISIT");
-            }
-        }
-        Places p = new Places();
-        public ActionResult EditAmountPlace(string id_location_level)
-        {
-            return View();
-        }
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult EditAmountPlace(string id_location_level, places pl)
-        {
-            try
-            {
-                if (p.AmountPlace(id_location_level, pl))
-                    return RedirectToAction("Levels");
-                else
-                    return View("EditLev");
-            }
-            catch
-            {
-                return View("EditLev");
-            }
-        }*/
 
     }
 }

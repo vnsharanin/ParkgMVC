@@ -11,6 +11,13 @@ namespace ParkgMVC.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Web;
+    using System.Web.Mvc;
+    using ParkgMVC.Models;
+    using System.Data;
+    using System.Data.Entity;
+    using System.ComponentModel.DataAnnotations;
     
     public partial class parkingzone
     {
@@ -21,6 +28,8 @@ namespace ParkgMVC.Models
     
         public int Parking_zone { get; set; }
         public long id_type { get; set; }
+
+        [Required(ErrorMessage = "Please, input adress for this zone...")]
         public string Address { get; set; }
     
         public virtual ICollection<levelzone> levelzone { get; set; }

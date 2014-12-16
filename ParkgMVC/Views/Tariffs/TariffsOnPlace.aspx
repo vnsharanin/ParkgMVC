@@ -11,7 +11,9 @@
     <h2>Тарифы, активные на текущий момент</h2>
         <table>
         <tr>
-            <th></th>
+                        <% if (User.IsInRole("Admin"))
+                   { %>
+            <th></th>        <%} %>
             <th>
                 Номер тарифа
             </th>
@@ -36,11 +38,16 @@
     <% foreach (var item in (IEnumerable<ParkgMVC.Models.tariffonplace>)ViewData["ActiveTariffs"]) {%>
     
         <tr>
+        <% if (User.IsInRole("Admin")) { %>
+                         <% using (Html.BeginForm("Edit_tariff_on_place", "Tariffs", FormMethod.Post))
+                            {%>
             <td>
-                <%: Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) %> |
-                <%: Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ })%> |
-                <%: Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })%>
+
+                <input type="hidden" name="id_tariff_on_place" id="Hidden2" value="<%: item.id_tariff_on_place %>" />
+                                 <input type="submit" name="Edit_tariff_on_place" id="Edit_tariff_on_place" value="Edit_tariff_on_place" />
+                 <input type="submit" name="Edit_tariff_on_place" id="Submit1" value="Off_tariff" />
             </td>
+            <% } } %>
             <td>
                 <%: item.id_tariff_on_place %>
             </td>
@@ -64,41 +71,54 @@
     <% } %>
 
     </table>
+
+                        <% if (User.IsInRole("Admin"))
+                       { %>
+                       <br />
+                             <% using (Html.BeginForm("New_tariff_on_place", "Tariffs", FormMethod.Post))
+                                {%>
+                     <input type="submit" name="New_tariff_on_place" id="Submit2" value="New_tariff_on_place" /><% }
+                       } %>
     </fieldset>
     <fieldset>
     <h2>Тарифы в неактивном состоянии</h2>
 
     <table>
         <tr>
-            <th></th>
+                        <% if (User.IsInRole("Admin"))
+                   { %>
+            <th></th>        <%} %>
             <th>
-                id_tariff_on_place
+                Номер тарифа
             </th>
             <th>
-                SupportClimateControl
+                Поддержка климат-контроля
             </th>
             <th>
-                Type
+                Тип(открытый, крытый, полукрытый)
             </th>
             <th>
-                PriceForHourWithoutAbonement
+                Цена за час без абонемента
             </th>
             <th>
-                PriceForHourWithAbonement
+                Цена за час с абонементом
             </th>
             <th>
-                Status
+                Статус
             </th>
         </tr>
 
     <% foreach (var item in (IEnumerable<ParkgMVC.Models.tariffonplace>)ViewData["NotActiveTariffs"]) {%>
     
         <tr>
+        <% if (User.IsInRole("Admin")) { %>
+                         <% using (Html.BeginForm("Edit_tariff_on_place", "Tariffs", FormMethod.Post))
+                            {%>
             <td>
-                <%: Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) %> |
-                <%: Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ })%> |
-                <%: Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })%>
+                <input type="hidden" name="id_tariff_on_place" id="Hidden1" value="<%: item.id_tariff_on_place %>" />
+                 <input type="submit" name="Edit_tariff_on_place" id="Submit3" value="Activate_tariff" />
             </td>
+            <% } } %>
             <td>
                 <%: item.id_tariff_on_place %>
             </td>

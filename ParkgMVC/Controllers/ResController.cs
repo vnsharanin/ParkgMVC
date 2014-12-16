@@ -74,51 +74,58 @@ namespace ParkgMVC.Controllers
 
         [AcceptVerbs(HttpVerbs.Post)]
         [MultiButton(MatchFormKey = "Agreement", MatchFormValue = "Next_step_formed")]
-        public ActionResult Next_step_formed(Int32 id_Reservation_Tariff)
+        public ActionResult Next_step_formed(Int32? id_Reservation_Tariff)
         {
-            if (User.Identity.IsAuthenticated)
+            if (id_Reservation_Tariff != null)
             {
-                //reservation_tariff check = mp.reservation_tariff.Where(x => x.Status == "available").FirstOrDefault();
-                
-                        string Log = User.Identity.Name.ToString();
-                        reservation activeres = mp.reservation.Where(x => x.Login == Log & x.Status == "Active").FirstOrDefault();
-                        if (activeres == null)
+                if (User.Identity.IsAuthenticated)
+                {
+                    //reservation_tariff check = mp.reservation_tariff.Where(x => x.Status == "available").FirstOrDefault();
+
+                    string Log = User.Identity.Name.ToString();
+                    reservation activeres = mp.reservation.Where(x => x.Login == Log & x.Status == "Active").FirstOrDefault();
+                    if (activeres == null)
+                    {
+                        reservation_tariff check = mp.reservation_tariff.Where(x => x.id_Reservation_Tariff == id_Reservation_Tariff & x.Status == "available").FirstOrDefault();
+                        if (check != null)
                         {
-                                            reservation_tariff check = mp.reservation_tariff.Where(x => x.id_Reservation_Tariff == id_Reservation_Tariff & x.Status == "available").FirstOrDefault();
-                                            if (check != null)
-                                            {
-                                                reservation formed = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
-                                                if (formed == null)
-                                                {
-                                                    reservation r = new reservation();
-                                                    r.CreateReservation("Reservation wait full formed", Log, check);
-                                                }
-                                                else if (formed != null)
-                                                {
-                                                    formed.id_Reservation_Tariff = id_Reservation_Tariff;
-                                                    mp.Entry(formed).State = EntityState.Modified;
-                                                    mp.SaveChanges();
-                                                    return RedirectToAction("Reservation");
-                                                }
-                                            }
-                                            else if (check == null)
-                                            {
-                                                ViewData["NewTariff"] = "Ранее подтвержденный Вами на использование тариф закончил свое действие, пожалуйста, ознакомьтесь с условиями для нового тарифа";
-                                                return View(mp.reservation_tariff.Where(x => x.Status == "available").ToList());
-                                            }
+                            reservation formed = mp.reservation.Where(x => x.Login == Log & x.Status == "Formed").FirstOrDefault();
+                            if (formed == null)
+                            {
+                                reservation r = new reservation();
+                                r.CreateReservation("Reservation wait full formed", Log, check);
+                            }
+                            else if (formed != null)
+                            {
+                                formed.id_Reservation_Tariff = (long)id_Reservation_Tariff;
+                                mp.Entry(formed).State = EntityState.Modified;
+                                mp.SaveChanges();
+                                return RedirectToAction("Reservation");
+                            }
                         }
-                        else if (activeres != null)
+                        else if (check == null)
                         {
-                            ViewData["NewTariff"] = "Вы уже имеете активное забронированное месторасположение!";
+                            ViewData["NewTariff"] = "Ранее подтвержденный Вами на использование тариф закончил свое действие, пожалуйста, ознакомьтесь с условиями для нового тарифа";
                             return View(mp.reservation_tariff.Where(x => x.Status == "available").ToList());
                         }
+                    }
+                    else if (activeres != null)
+                    {
+                        ViewData["NewTariff"] = "Вы уже имеете активное забронированное месторасположение!";
+                        return View(mp.reservation_tariff.Where(x => x.Status == "available").ToList());
+                    }
                     //return RedirectToAction("ZonesLevelsPlaces", new { Controller = "Home", value = "RESERVATION" });
-                
-                return RedirectToAction("ZonesLevelsPlaces", new { Controller = "Home", value = "RESERVATION" });
+
+                    return RedirectToAction("ZonesLevelsPlaces", new { Controller = "Home", value = "RESERVATION" });
+                }
+                else
+                {
+                    return RedirectToAction("LogOn", new { Controller = "Account" });
+                }
             }
             else
             {
-                return RedirectToAction("LogOn", new { Controller = "Account" });
+                return RedirectToAction("Reservation");
             }
         }
 

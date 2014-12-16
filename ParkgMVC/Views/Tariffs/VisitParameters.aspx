@@ -10,7 +10,9 @@
     <h2>Текущие параметры</h2>
     <table>
         <tr>
-            <th></th>
+                        <% if (User.IsInRole("Admin"))
+                   { %>
+            <th></th>        <%} %>
             <th>
                 Номер набора параметров
             </th>
@@ -28,11 +30,15 @@
     <% foreach (var item in (IEnumerable<ParkgMVC.Models.visitparameters>)ViewData["ActiveParameters"]) {%>
     
         <tr>
+        <% if (User.IsInRole("Admin")) { %>
+                         <% using (Html.BeginForm("Edit_visit_parameters", "Tariffs", FormMethod.Post))
+                            {%>
             <td>
-                <%: Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) %> |
-                <%: Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ })%> |
-                <%: Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })%>
+                <input type="hidden" name="id_vis_param" id="id_vis_param" value="<%: item.id_vis_param %>" />
+                 <input type="submit" name="Edit_visit_parameters" id="Edit_visit_parameters" value="Edit_visit_parameters" />
+                                  <input type="submit" name="Edit_visit_parameters" id="Submit2" value="Off_parameters" />
             </td>
+            <% } } %>
             <td>
                 <%: item.id_vis_param %>
             </td>
@@ -51,16 +57,22 @@
 
     </table>
 
-    <p>
-        <%: Html.ActionLink("Create New", "Create") %>
-    </p>
+                    <% if (User.IsInRole("Admin"))
+                       { %>
+                       <br />
+                             <% using (Html.BeginForm("Create_visit_parameters", "Tariffs", FormMethod.Post))
+                                {%>
+                     <input type="submit" name="Create_visit_parameters" id="Submit1" value="New_visit_parameters" /><% }
+                       } %>
         </fieldset>
         <fieldset>
         <h2>Неактивные наборы параметров</h2>
         
             <table>
         <tr>
-            <th></th>
+                                <% if (User.IsInRole("Admin"))
+                           { %>
+            <th></th>            <%} %>
             <th>
                 Номер набора параметров
             </th>
@@ -78,11 +90,14 @@
     <% foreach (var item in (IEnumerable<ParkgMVC.Models.visitparameters>)ViewData["NotActiveParameters"]) {%>
     
         <tr>
+        <% if (User.IsInRole("Admin")) { %>
+                         <% using (Html.BeginForm("Edit_visit_parameters", "Tariffs", FormMethod.Post))
+                            {%>
             <td>
-                <%: Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) %> |
-                <%: Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ })%> |
-                <%: Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })%>
+                <input type="hidden" name="id_vis_param" id="Hidden1" value="<%: item.id_vis_param %>" />
+                 <input type="submit" name="Edit_visit_parameters" id="Submit3" value="Activate_parameters" />
             </td>
+            <% } } %>
             <td>
                 <%: item.id_vis_param %>
             </td>

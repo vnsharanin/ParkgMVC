@@ -11,7 +11,10 @@
     <h2>Текущий тариф на бронирование</h2>
     <table>
         <tr>
+                <% if (User.IsInRole("Admin"))
+                   { %>
         <th></th>
+        <%} %>
             <th>
                 Номер тарифа
             </th>
@@ -34,11 +37,15 @@
     <% foreach (var item in (IEnumerable<ParkgMVC.Models.reservation_tariff>)ViewData["ActiveTariff"]) {%>
     
         <tr>
+        <% if (User.IsInRole("Admin")) { %>
+                         <% using (Html.BeginForm("Edit_reservation_tariff", "Tariffs", FormMethod.Post))
+                            {%>
             <td>
-                <%: Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) %> |
-                <%: Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ })%> |
-                <%: Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })%>
+                <input type="hidden" name="id_reservation_tariff" id="id_reservation_tariff" value="<%: item.id_Reservation_Tariff %>" />
+                 <input type="submit" name="Edit_reservation_tariff" id="Edit_reservation_tariff" value="Edit_reservation_tariff" />
+                                  <input type="submit" name="Edit_reservation_tariff" id="Submit2" value="Off_reservation_tariff" />
             </td>
+            <% } } %>
             <td>
                 <%: item.id_Reservation_Tariff %>
             </td>
@@ -59,38 +66,55 @@
     <% } %>
 
     </table>
+                    <% if (User.IsInRole("Admin"))
+                       { %>
+                       <br />
+                             <% using (Html.BeginForm("Create_reservation_tariff", "Tariffs", FormMethod.Post))
+                                {%>
+                     <input type="submit" name="Create_reservation_tariff" id="Submit1" value="New_reservation_tariff" /><% }
+                       } %>
     </fieldset>
     <br />
     <fieldset>
     <h2>Неактивные тарифы</h2>
         <table>
         <tr>
+                        <% if (User.IsInRole("Admin"))
+                           { %>
             <th></th>
+            <%} %>
             <th>
-                id_Reservation_Tariff
+                Номер тарифа
             </th>
             <th>
-                FirstFreeTimeInMinutes
+                Первое бесплатное время(мин)
             </th>
             <th>
-                PriceInRubForHourHightFreeTime
+                Цена(р) за час свыше
+                бесплатного времени
             </th>
             <th>
-                ValidityPeriodFromTheTimeOfActivationInHour
+                Статус тарифа.
             </th>
             <th>
-                Status
+                Время действия с
+                момента подключения (ч)
             </th>
         </tr>
 
     <% foreach (var item in (IEnumerable<ParkgMVC.Models.reservation_tariff>)ViewData["NotActiveTariffs"]) {%>
     
         <tr>
+                        <% if (User.IsInRole("Admin"))
+                           { %>
+                                 <% using (Html.BeginForm("Edit_reservation_tariff", "Tariffs", FormMethod.Post))
+                                    {%>
             <td>
-                <%: Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) %> |
-                <%: Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ })%> |
-                <%: Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })%>
+                            <input type="hidden" name="id_reservation_tariff" id="Hidden1" value="<%: item.id_Reservation_Tariff %>" />
+                                  <input type="submit" name="Edit_reservation_tariff" id="Submit3" value="Activate_reservation_tariff" />
             </td>
+            <% }
+                           }%>
             <td>
                 <%: item.id_Reservation_Tariff %>
             </td>
@@ -101,10 +125,10 @@
                 <%: String.Format("{0:F}", item.PriceInRubForHourHightFreeTime) %>
             </td>
             <td>
-                <%: item.ValidityPeriodFromTheTimeOfActivationInHour %>
+                <%: item.Status %>
             </td>
             <td>
-                <%: item.Status %>
+                <%: item.ValidityPeriodFromTheTimeOfActivationInHour %>
             </td>
         </tr>
     

@@ -28,17 +28,27 @@
             <th>
                 Количество мест
             </th>
+                                <% if (!User.IsInRole("Admin"))
+                                   { %>
                         <th>
                 Количество свободных мест
             </th>
+            <% } else { %>
+                                    <th>
+                Количество ТС, простаивающих на уровне.
+            </th>
+            <% } %>
+
         </tr>
          <% ParkgMVC.Models.MyParkingEntities mp = new ParkgMVC.Models.MyParkingEntities();%>
     <% foreach (var item in Model) { %>
                 <%  int p = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status != "Was replaced" & x.Status != "Disabled");
                     int freep = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Free");
                     int notw = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Not working");
+                    int occup = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Occupied");
+                    int inwait = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "In waiting visit");
                     int disabled = mp.place.Count(x => x.id_location_level == item.id_location_level & x.Status == "Was replaced" & x.Status == "Disabled");           
-                    ViewData["AmPl"] = p; ViewData["AmFreePl"] = freep;%>
+                    %>
 
                     <!-- возможно & p != 0 из условия будет лучше убрать. Подумать над этим.-->
 
@@ -64,16 +74,21 @@
             <input type="hidden" name="id_location_level" id="Hidden7" value="<%: item.id_location_level %>" />
             <input type="hidden" name="Parking_zone" id="Hidden8" value="<%: item.Parking_zone %>" />
                 <td>
-          <% if (disabled != p) {%>     <input type="submit" name="Levels" id="Submit1" value="Disabled_level" /></td>
-        <td>  <% if (notw != p)
+          <% if (disabled != p) 
+             {%>     
+             <input type="submit" name="Levels" id="Submit1" value="Disabled_level" /> <% } %>
+               </td>
+               
+
+        <td>  <% if (disabled != p & (occup + notw) != p)
              {%>
            <input type="submit" name="Levels" id="Submit2" value="Temporarily_not_working" />
           <% }
-                 if (freep != p)
+             if (disabled != p & (freep+occup+inwait) != p)
              { %>
               <input type="submit" name="Levels" id="Submit3" value="Run_this_level" />
           <% } %>
-           <% } %>
+          
                  </td>
                   <% } %>
                
@@ -101,27 +116,25 @@
                                  
                        
              <td> 
-                <%: ViewData["AmPl"]%>
-            </td>
-                         <td> 
-                <%: ViewData["AmFreePl"]%>
-            </td>
+                <%: p%>
+               </td><td> 
+                                                <% if (!User.IsInRole("Admin"))
+                                                   { %>
+                         
+                <%: freep%>
+           
+            <% }
+                                                   else
+                                                   { %>
+                                                                          
+                <%: occup%>
+           
+            <% } %> </td>
         </tr>
         <% } %>
     <% } %>
 
     </table>
     </fieldset>
-    <p>
-        <%: Html.ActionLink("Create New", "Create") %>
-    </p>
-        <p>
-        <%: Html.ActionLink("Back to ZonesLevelsPlaces", "ZonesLevelsPlaces")%>
-    </p>
-
-            <div>
-        <%: Html.ActionLink("Back to Index", "Index")%>
-    </div>
-
 </asp:Content>
 

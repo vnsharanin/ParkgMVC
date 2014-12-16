@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<ParkgMVC.Models.place>>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-	Places
+	Места
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
@@ -63,7 +63,12 @@
         <%: Html.ValidationSummary(true) %>
                 <fieldset>
 
-    <h2>Places</h2>
+    <h2>Места</h2>
+
+    <% if (ViewData["Reservation"].ToString() == "RESERVATION" & Model.Count() == 0)
+       { %>
+       <h1> На этом уровне свободных мест нет, Вы можете подождать пока они появятся или посмотреть другие доступные уровни, если таковые имеются.</h1>
+    <% } else {%>
         <%: ViewData["Zone-Level"] %>
     <table>
         <tr>
@@ -74,13 +79,13 @@
             <% } else if (ViewData["Reservation"].ToString() == "RESERVATION") { %>
             <th></th>
             <% } %>
-            <th>
-                Place
+            <th style="width: 100px">
+                № места
             </th>
-            <th>
-                Status
+            <th style="width: 100px">
+                Статус
             </th>
-            <th>
+            <th style="width: 100px">
                 Номер тарифа
             </th>
         </tr>
@@ -122,25 +127,22 @@
                         </td>   <%   } %>
               
               
-            <td>
+            <td style="width: 100px">
                 <%: item.NumberPlace %>
             </td>
-            <td>
+            <td style="width: 100px">
                 <%: item.Status %>
             </td>
-            <td>
+            <td style="width: 100px">
                 <%: item.id_tariff_on_place %>
             </td>
         </tr>
     
     <% } %>
     </table>
-
-    <p>
-        <%: Html.ActionLink("Create New", "Create") %>
-    </p>
             <p>
              <% if (ViewData["Reservation"].ToString() == "RESERVATION") { %> 
+             <br />
             <label id="label">МЕСТОРАСПОЛОЖЕНИЕ НЕ ВЫБРАНО!</label><br>
             <input type="submit" name="Places" id="ConnectReservation" value="ConnectReservation"  />
             <input type="submit" name="Places" id="SaveReservation" value="SaveReservation" />
@@ -150,6 +152,7 @@
                         document.getElementById("SaveReservation").disabled = true;
     </script>
        <% } %>
+    <% } %>
     <% } %>
 </asp:Content>
 

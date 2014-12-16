@@ -62,14 +62,7 @@ namespace ParkgMVC.Models
         //уже не нужное отправить сюда
         public bool FreePlace(long free_id_loc_place)
         {
-            /* Может сделать следующую штуку?
-             Если все брони покрыты местами, null нет ни у кого. То заняться поиском тех броней у которых
-             альтернативное и первоначальное место отличаются и если альтернативное хуже изначального, тогда
-             проверить может быть это будет лучше или такое(по тарифу) и если это освобождающееся окажется лучше, то
-             ту альтернативу затереть (месту присвоить free, альт-й тариф сделать равным первоначальному) в рекурсию FreePlace
-             и теперь в аллтернативе расп-я в броне указываю это расположение, а в месте указ-ю соотв-й тариф и меняю статус
-             
-             */
+            
             bool res = true;
             place fp = mp.place.Where(x => x.id_location_place == free_id_loc_place).FirstOrDefault();
             var obj = mp.reservation.Where(x => x.Status == "Active" & x.id_alternative_location_place == null).ToList();
@@ -216,15 +209,39 @@ namespace ParkgMVC.Models
             reservation expired = new reservation();
             expired.FindOnExpired("");
             place last = mp.place.Where(x => x.id_location_level == id_loc_level & x.Status != "Was replaced").OrderByDescending(x => x.NumberPlace).FirstOrDefault();
-
+           // bool conti = true;
+           // Int32 Last_place_2 = Last_place+1;
             for (int i = Last_place + 1; i <= last.NumberPlace; i++)
             {
                 place not_working_place = mp.place.Where(x => x.id_location_level == id_loc_level & x.NumberPlace == i & x.Status != "Was replaced").FirstOrDefault();
-                place change = new place();
-                if (not_working_place.Status != "Disabled" & not_working_place.Status != Status)
+                if (not_working_place.Status == "Occupied" & Status != "Not working")
                 {
-                    if (not_working_place.Status != "Occupied")
+                    Result = "В сокращаемом диапазоне были обнаружены занятые места, их отключение невозможно, поэтому сокращаемый диапазон частично перевелся в состояние 'not working'";
+                    Status = "Not working";
+                    place occ = mp.place.Where(x => x.Status == "Occupied").OrderByDescending(x => x.NumberPlace).FirstOrDefault();
+                    place recurs = new place();
+                    recurs.Disable(id_loc_level,occ.NumberPlace,"Disabled");
+                    // occ.NumberPlace + 1;
+                    break;
+                }
+                else if (not_working_place.Status == "Occupied" & Status == "Not working")
+                {
+                    Result = "В связи с тем, что одно или более транспортных мест на данный момент находится на этом уровне парковки, места были отключены не полностью...";
+                    break;
+                }
+            }
+
+            place last2 = mp.place.Where(x => x.id_location_level == id_loc_level & x.Status != "Was replaced").OrderByDescending(x => x.NumberPlace).FirstOrDefault();
+
+            for (int i = Last_place + 1; i <= last2.NumberPlace; i++)
+            {
+                place not_working_place = mp.place.Where(x => x.id_location_level == id_loc_level & x.NumberPlace == i & x.Status != "Was replaced").FirstOrDefault();
+                if (not_working_place.Status != "Occupied")
+                {
+                    place change = new place();
+                    if (not_working_place.Status != "Disabled" & not_working_place.Status != Status)
                     {
+
                         if (not_working_place.Status == "In waiting visit")
                         {
                             change.ChangeStatus(Status, not_working_place.id_location_place, 0);
@@ -278,7 +295,6 @@ namespace ParkgMVC.Models
                         }
                         else { change.ChangeStatus(Status, not_working_place.id_location_place, 0); }
                     }
-                    else Result = "В связи с тем, что одно или более транспортных мест на данный момент находится на парковке, места были отключены не полностью...";
                 }
             }
 
@@ -356,15 +372,15 @@ namespace ParkgMVC.Models
                             mp.Entry(res).State = EntityState.Modified;
                             mp.SaveChanges();
                             change.ChangeStatus("In waiting visit", disabled.id_location_place, 0);
-                            
+
                             //Т.е. админ должен потом решить включить ли то место с со СТАРЫМ тарифом или ждать пока бронь кончится,
                             //а потом как доступ к изменению тарифу будет открыт(как закончится бронь) он его изменит и включит.
                             //Совпадающий тариф учитывается
                         }
                         else if (Status == "Free" & disabled.id_tariff_on_place != id_tariff_on_place)
                         {
-                                change.ChangeStatus("Not working", disabled.id_location_place, 0);
-                                Result = "0";
+                            change.ChangeStatus("Not working", disabled.id_location_place, 0);
+                            Result = "0";
                         }
                         if (Status != "Free" & disabled.id_tariff_on_place != id_tariff_on_place)
                         {
@@ -381,6 +397,7 @@ namespace ParkgMVC.Models
                     }
                     else
                     {
+
                         disabled.Status = Status;
                         disabled.id_tariff_on_place = id_tariff_on_place;
                         disabled.id_alternative_tariff_on_place = (int)id_tariff_on_place;
@@ -394,18 +411,22 @@ namespace ParkgMVC.Models
                 }
                 else
                 {
-                    place new_place = new place();
-                    new_place.NumberPlace = i;
-                    new_place.Status = Status;
-                    new_place.id_tariff_on_place = id_tariff_on_place;
-                    new_place.id_alternative_tariff_on_place = (int)id_tariff_on_place;
-                    new_place.id_location_level = id_loc_level;
-                    mp.place.Add(new_place);
-                    mp.SaveChanges();
-                    if (Status == "Free")
+                    place di = mp.place.Where(x => x.id_location_level == id_loc_level & x.Status == "Occupied" & x.NumberPlace == i).FirstOrDefault();
+                    if (di == null)
                     {
-                        place new_place_search = mp.place.Where(x => x.NumberPlace == i & x.Status == Status & x.id_tariff_on_place == id_tariff_on_place & x.id_location_level == id_loc_level & x.id_alternative_tariff_on_place == (int)id_tariff_on_place).FirstOrDefault();
-                        change.FreePlace((long)new_place_search.id_location_place);
+                        place new_place = new place();
+                        new_place.NumberPlace = i;
+                        new_place.Status = Status;
+                        new_place.id_tariff_on_place = id_tariff_on_place;
+                        new_place.id_alternative_tariff_on_place = (int)id_tariff_on_place;
+                        new_place.id_location_level = id_loc_level;
+                        mp.place.Add(new_place);
+                        mp.SaveChanges();
+                        if (Status == "Free")
+                        {
+                            place new_place_search = mp.place.Where(x => x.NumberPlace == i & x.Status == Status & x.id_tariff_on_place == id_tariff_on_place & x.id_location_level == id_loc_level & x.id_alternative_tariff_on_place == (int)id_tariff_on_place).FirstOrDefault();
+                            change.FreePlace((long)new_place_search.id_location_place);
+                        }
                     }
                 }
             }
