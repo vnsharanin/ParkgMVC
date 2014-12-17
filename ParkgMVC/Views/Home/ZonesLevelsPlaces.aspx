@@ -5,7 +5,7 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
+<script src="/Scripts/jquery-1.8.2.min.js" type="text/javascript"></script>
 <h1 style="color:#FF0000"><%: ViewData["EditZone1"]%></h1>
 <h1 style="color:#FF0000"><%: ViewData["EditZone2"]%></h1>
         <h1 style="color:#FF0000"><%: ViewData["ReservationPlace"] %></h1>

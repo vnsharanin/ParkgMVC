@@ -16,7 +16,7 @@
 
             <div class="editor-label">
                 <%: Html.LabelFor(model => model.SupportClimateControl) %>
-            </div>
+            </div>(YES, NO)
             <div class="editor-field">
                 <%: Html.TextBoxFor(model => model.SupportClimateControl) %>
                 <%: Html.ValidationMessageFor(model => model.SupportClimateControl) %>
@@ -24,7 +24,7 @@
             
             <div class="editor-label">
                 <%: Html.LabelFor(model => model.Type) %>
-            </div>
+            </div>(Closed, Opened, Closed-Opened)
             <div class="editor-field">
                 <%: Html.TextBoxFor(model => model.Type) %>
                 <%: Html.ValidationMessageFor(model => model.Type) %>
@@ -48,7 +48,7 @@
             
             <div class="editor-label">
                 <%: Html.LabelFor(model => model.Status) %>
-            </div>
+            </div>(Active, Not active)
             <div class="editor-field">
                 <%: Html.TextBoxFor(model => model.Status) %>
                 <%: Html.ValidationMessageFor(model => model.Status) %>

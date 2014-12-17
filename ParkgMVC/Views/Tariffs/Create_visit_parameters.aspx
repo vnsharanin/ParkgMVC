@@ -32,7 +32,7 @@
             
             <div class="editor-label">
                 <%: Html.LabelFor(model => model.Status) %>
-            </div>
+            </div>(Active, Not active)
             <div class="editor-field">
                 <%: Html.TextBoxFor(model => model.Status) %>
                 <%: Html.ValidationMessageFor(model => model.Status) %>

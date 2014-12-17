@@ -37,26 +37,32 @@ namespace ParkgMVC.Controllers
         [HttpPost]
         public ActionResult LogOn(LogOnModel model, string returnUrl)
         {
-            if (ModelState.IsValid)
+            try
             {
-                if (MembershipService.ValidateUser(model.UserName, model.Password))
+                if (ModelState.IsValid)
                 {
-                    FormsService.SignIn(model.UserName, model.RememberMe);
-                    if (!String.IsNullOrEmpty(returnUrl))
+                    if (MembershipService.ValidateUser(model.UserName, model.Password))
                     {
-                        return Redirect(returnUrl);
+                        FormsService.SignIn(model.UserName, model.RememberMe);
+                        if (!String.IsNullOrEmpty(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
+                        else
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
                     }
                     else
                     {
-                        return RedirectToAction("Index", "Home");
+                        ModelState.AddModelError("", "Имя пользователя или пароль указаны неверно.");
                     }
                 }
-                else
-                {
-                    ModelState.AddModelError("", "Имя пользователя или пароль указаны неверно.");
-                }
             }
-
+            catch
+            {
+                return View(model);
+            }
             // Появление этого сообщения означает наличие ошибки; повторное отображение формы
             return View(model);
         }

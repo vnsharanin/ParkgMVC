@@ -113,8 +113,8 @@ namespace ParkgMVC.Models
         {
             if (String.IsNullOrEmpty(userName)) throw new ArgumentException("Значение не может быть равно NULL или быть пустым.", "userName");
             if (String.IsNullOrEmpty(password)) throw new ArgumentException("Значение не может быть неопределенным (null) или пустым.", "password");
-
-            return _provider.ValidateUser(userName, password);
+            
+                return _provider.ValidateUser(userName, password);
         }
 
         public MembershipCreateStatus CreateUser(string userName, string password, string email)

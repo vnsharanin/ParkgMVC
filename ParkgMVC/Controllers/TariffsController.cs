@@ -103,17 +103,36 @@ namespace ParkgMVC.Controllers
         [MultiButton(MatchFormKey = "Create_reservation_tariff", MatchFormValue = "Save_new_reservation_tariff")]
         public ActionResult Save_reservation_tariff(reservation_tariff rt)
         {
-
-            reservation_tariff old = mp.reservation_tariff.Where(x => x.PriceInRubForHourHightFreeTime == rt.PriceInRubForHourHightFreeTime & x.FirstFreeTimeInMinutes == rt.FirstFreeTimeInMinutes & x.ValidityPeriodFromTheTimeOfActivationInHour == rt.ValidityPeriodFromTheTimeOfActivationInHour).FirstOrDefault();
-            if (old != null)
+            if (ModelState.IsValid)
             {
-                if (old.Status == rt.Status & rt.Status == "available")
+                reservation_tariff old = mp.reservation_tariff.Where(x => x.PriceInRubForHourHightFreeTime == rt.PriceInRubForHourHightFreeTime & x.FirstFreeTimeInMinutes == rt.FirstFreeTimeInMinutes & x.ValidityPeriodFromTheTimeOfActivationInHour == rt.ValidityPeriodFromTheTimeOfActivationInHour).FirstOrDefault();
+                if (old != null)
                 {
-                    ViewData["ReservationTariff"] = "Такой тариф уже существует и он активен";
-                }
-                else if (old.Status == rt.Status & rt.Status == "Not available")
-                {
+                    if (old.Status == rt.Status & rt.Status == "available")
+                    {
+                        ViewData["ReservationTariff"] = "Такой тариф уже существует и он активен";
+                    }
+                    else if (old.Status == rt.Status & rt.Status == "Not available")
+                    {
 
+                        reservation_tariff oldforchange = mp.reservation_tariff.Where(x => x.Status == "available").FirstOrDefault();
+                        if (rt.Status == "available")
+                        {
+                            if (oldforchange != null)
+                            {
+                                oldforchange.Status = "Not available";
+                                mp.Entry(oldforchange).State = EntityState.Modified;
+                                mp.SaveChanges();
+                            }
+                        }
+
+                        old.Status = rt.Status;
+                        mp.Entry(old).State = EntityState.Modified;
+                        mp.SaveChanges();
+                    }
+                }
+                else
+                {
                     reservation_tariff oldforchange = mp.reservation_tariff.Where(x => x.Status == "available").FirstOrDefault();
                     if (rt.Status == "available")
                     {
@@ -125,33 +144,16 @@ namespace ParkgMVC.Controllers
                         }
                     }
 
-                    old.Status = rt.Status;
-                    mp.Entry(old).State = EntityState.Modified;
+                    reservation_tariff rnew = new reservation_tariff();
+                    rnew.Status = rt.Status;
+                    rnew.ValidityPeriodFromTheTimeOfActivationInHour = rt.ValidityPeriodFromTheTimeOfActivationInHour;
+                    rnew.PriceInRubForHourHightFreeTime = rt.PriceInRubForHourHightFreeTime;
+                    rnew.FirstFreeTimeInMinutes = rt.FirstFreeTimeInMinutes;
+                    mp.reservation_tariff.Add(rnew);
                     mp.SaveChanges();
                 }
             }
-            else
-            {
-                reservation_tariff oldforchange = mp.reservation_tariff.Where(x => x.Status == "available").FirstOrDefault();
-                if (rt.Status == "available")
-                {
-                    if (oldforchange != null)
-                    {
-                        oldforchange.Status = "Not available";
-                        mp.Entry(oldforchange).State = EntityState.Modified;
-                        mp.SaveChanges();
-                    }
-                }
-
-                reservation_tariff rnew = new reservation_tariff();
-                rnew.Status = rt.Status;
-                rnew.ValidityPeriodFromTheTimeOfActivationInHour = rt.ValidityPeriodFromTheTimeOfActivationInHour;
-                rnew.PriceInRubForHourHightFreeTime = rt.PriceInRubForHourHightFreeTime;
-                rnew.FirstFreeTimeInMinutes = rt.FirstFreeTimeInMinutes;
-                mp.reservation_tariff.Add(rnew);
-                mp.SaveChanges();
-            }
-
+            else return View();
             return RedirectToAction("ReservationTariffs");
         }
 
@@ -161,6 +163,8 @@ namespace ParkgMVC.Controllers
         {
             if (id_reservation_tariff != null)
             {
+                if (ModelState.IsValid)
+                {
                 reservation_tariff oldforchange = mp.reservation_tariff.Where(x => x.id_Reservation_Tariff == id_reservation_tariff).FirstOrDefault();
                 reservation_tariff old = mp.reservation_tariff.Where(x => x.id_Reservation_Tariff == id_reservation_tariff & x.PriceInRubForHourHightFreeTime == rt.PriceInRubForHourHightFreeTime & x.FirstFreeTimeInMinutes == rt.FirstFreeTimeInMinutes & x.ValidityPeriodFromTheTimeOfActivationInHour == rt.ValidityPeriodFromTheTimeOfActivationInHour).FirstOrDefault();
                 if (old != null)
@@ -203,6 +207,7 @@ namespace ParkgMVC.Controllers
                         }
                     }
                 }
+            }else return View();
             }
             return RedirectToAction("ReservationTariffs");
         }
@@ -258,17 +263,37 @@ namespace ParkgMVC.Controllers
             //ViewData["VisitParameters"] = "";
             //Наверное зедсь будет лучше если найдется запись с такими же параметрами в Not active, а создаваемые такие же будут Active,
             //Тогда перевести просто ту запись в Active.
-            visitparameters old = mp.visitparameters.Where(x => x.FirstFreeTimeInMinutes == vp.FirstFreeTimeInMinutes & x.FirstFreeTimeOnChangeBalans == vp.FirstFreeTimeOnChangeBalans).FirstOrDefault();
-            if (old != null)
+            if (ModelState.IsValid)
             {
-                if (old.Status == vp.Status & vp.Status == "Active")
+                visitparameters old = mp.visitparameters.Where(x => x.FirstFreeTimeInMinutes == vp.FirstFreeTimeInMinutes & x.FirstFreeTimeOnChangeBalans == vp.FirstFreeTimeOnChangeBalans).FirstOrDefault();
+                if (old != null)
                 {
-                    ViewData["VisitParameters"] = "Такой тариф уже существует и он активен";
-                    return View(vp);
-                }
-                else if (old.Status == vp.Status & vp.Status != "Active")
-                {
+                    if (old.Status == vp.Status & vp.Status == "Active")
+                    {
+                        ViewData["VisitParameters"] = "Такой тариф уже существует и он активен";
+                        return View(vp);
+                    }
+                    else if (old.Status == vp.Status & vp.Status != "Active")
+                    {
 
+                        visitparameters oldforchange = mp.visitparameters.Where(x => x.Status == "Active").FirstOrDefault();
+                        if (vp.Status == "Active")
+                        {
+                            if (oldforchange != null)
+                            {
+                                oldforchange.Status = "Not active";
+                                mp.Entry(oldforchange).State = EntityState.Modified;
+                                mp.SaveChanges();
+                            }
+                        }
+
+                        old.Status = vp.Status;
+                        mp.Entry(old).State = EntityState.Modified;
+                        mp.SaveChanges();
+                    }
+                }
+                else
+                {
                     visitparameters oldforchange = mp.visitparameters.Where(x => x.Status == "Active").FirstOrDefault();
                     if (vp.Status == "Active")
                     {
@@ -280,32 +305,15 @@ namespace ParkgMVC.Controllers
                         }
                     }
 
-                    old.Status = vp.Status;
-                    mp.Entry(old).State = EntityState.Modified;
+                    visitparameters vnew = new visitparameters();
+                    vnew.Status = vp.Status;
+                    vnew.FirstFreeTimeInMinutes = vp.FirstFreeTimeInMinutes;
+                    vnew.FirstFreeTimeOnChangeBalans = vp.FirstFreeTimeOnChangeBalans;
+                    mp.visitparameters.Add(vnew);
                     mp.SaveChanges();
                 }
             }
-            else
-            {
-                visitparameters oldforchange = mp.visitparameters.Where(x => x.Status == "Active").FirstOrDefault();
-                if (vp.Status == "Active")
-                {
-                    if (oldforchange != null)
-                    {
-                        oldforchange.Status = "Not active";
-                        mp.Entry(oldforchange).State = EntityState.Modified;
-                        mp.SaveChanges();
-                    }
-                }
-
-                visitparameters vnew = new visitparameters();
-                vnew.Status = vp.Status;
-                vnew.FirstFreeTimeInMinutes = vp.FirstFreeTimeInMinutes;
-                vnew.FirstFreeTimeOnChangeBalans = vp.FirstFreeTimeOnChangeBalans;
-                mp.visitparameters.Add(vnew);
-                mp.SaveChanges();
-            }
-
+            else return View();
             return RedirectToAction("VisitParameters");
         }
 
@@ -317,51 +325,54 @@ namespace ParkgMVC.Controllers
         {
             if (id_vis_param != null)
             {
-                visitparameters oldforchange = mp.visitparameters.Where(x => x.id_vis_param == id_vis_param).FirstOrDefault();
-                if (oldforchange != null)
+                if (ModelState.IsValid)
                 {
-                    visitparameters old = mp.visitparameters.Where(x => x.id_vis_param == id_vis_param & x.FirstFreeTimeInMinutes == vp.FirstFreeTimeInMinutes & x.FirstFreeTimeOnChangeBalans == vp.FirstFreeTimeOnChangeBalans).FirstOrDefault();
-                    if (old != null)
+                    visitparameters oldforchange = mp.visitparameters.Where(x => x.id_vis_param == id_vis_param).FirstOrDefault();
+                    if (oldforchange != null)
                     {
-                        ViewData["VisitParameters"] = "Изменений не произошло!";
-                        return View(old);
-                    }
-                    else
-                    {
-                        if (oldforchange.Status != "Active")
+                        visitparameters old = mp.visitparameters.Where(x => x.id_vis_param == id_vis_param & x.FirstFreeTimeInMinutes == vp.FirstFreeTimeInMinutes & x.FirstFreeTimeOnChangeBalans == vp.FirstFreeTimeOnChangeBalans).FirstOrDefault();
+                        if (old != null)
                         {
-                            ViewData["VisitParameters"] = "Этот набор больше неактивен, применить к нему измененения невозможно!";
+                            ViewData["VisitParameters"] = "Изменений не произошло!";
                             return View(old);
                         }
                         else
                         {
-                            //произвожу изменение статуса тарифа на not active в oldforchange
-                            oldforchange.Status = "Not active";
-                            mp.Entry(oldforchange).State = EntityState.Modified;
-                            mp.SaveChanges();
-                            visitparameters old2 = mp.visitparameters.Where(x => x.FirstFreeTimeInMinutes == vp.FirstFreeTimeInMinutes & x.FirstFreeTimeOnChangeBalans == vp.FirstFreeTimeOnChangeBalans).FirstOrDefault();
-                            if (old2 != null)
+                            if (oldforchange.Status != "Active")
                             {
-                                if (old2.Status != "Active")
-                                {
-                                    old2.Status = "Active";
-                                    mp.Entry(old2).State = EntityState.Modified;
-                                    mp.SaveChanges();
-                                }
+                                ViewData["VisitParameters"] = "Этот набор больше неактивен, применить к нему измененения невозможно!";
+                                return View(old);
                             }
                             else
                             {
-                                visitparameters vnew = new visitparameters();
-                                vnew.Status = "Active";
-                                vnew.FirstFreeTimeInMinutes = vp.FirstFreeTimeInMinutes;
-                                vnew.FirstFreeTimeOnChangeBalans = vp.FirstFreeTimeOnChangeBalans;
-                                mp.visitparameters.Add(vnew);
+                                //произвожу изменение статуса тарифа на not active в oldforchange
+                                oldforchange.Status = "Not active";
+                                mp.Entry(oldforchange).State = EntityState.Modified;
                                 mp.SaveChanges();
+                                visitparameters old2 = mp.visitparameters.Where(x => x.FirstFreeTimeInMinutes == vp.FirstFreeTimeInMinutes & x.FirstFreeTimeOnChangeBalans == vp.FirstFreeTimeOnChangeBalans).FirstOrDefault();
+                                if (old2 != null)
+                                {
+                                    if (old2.Status != "Active")
+                                    {
+                                        old2.Status = "Active";
+                                        mp.Entry(old2).State = EntityState.Modified;
+                                        mp.SaveChanges();
+                                    }
+                                }
+                                else
+                                {
+                                    visitparameters vnew = new visitparameters();
+                                    vnew.Status = "Active";
+                                    vnew.FirstFreeTimeInMinutes = vp.FirstFreeTimeInMinutes;
+                                    vnew.FirstFreeTimeOnChangeBalans = vp.FirstFreeTimeOnChangeBalans;
+                                    mp.visitparameters.Add(vnew);
+                                    mp.SaveChanges();
+                                }
                             }
                         }
-
                     }
                 }
+                else return View();
                 
             }return RedirectToAction("VisitParameters");
         }
@@ -489,18 +500,38 @@ namespace ParkgMVC.Controllers
             //ViewData["VisitParameters"] = "";
             //Наверное зедсь будет лучше если найдется запись с такими же параметрами в Not active, а создаваемые такие же будут Active,
             //Тогда перевести просто ту запись в Active.
-            tariffonplace old = mp.tariffonplace.Where(x => x.SupportClimateControl == tp.SupportClimateControl & x.Type == tp.Type & x.PriceForHourWithAbonement == tp.PriceForHourWithAbonement & x.PriceForHourWithoutAbonement == tp.PriceForHourWithoutAbonement).FirstOrDefault();
-            if (old != null)
+            if (ModelState.IsValid)
             {
-                if (old.Status == "Active")
+                tariffonplace old = mp.tariffonplace.Where(x => x.SupportClimateControl == tp.SupportClimateControl & x.Type == tp.Type & x.PriceForHourWithAbonement == tp.PriceForHourWithAbonement & x.PriceForHourWithoutAbonement == tp.PriceForHourWithoutAbonement).FirstOrDefault();
+                if (old != null)
                 {
-                    ViewData["VisitParameters"] = "Такой тариф уже существует и он активен";
-                    return View(tp);
-                }
-                else if (old.Status != "Active")
-                {
+                    if (old.Status == "Active")
+                    {
+                        ViewData["VisitParameters"] = "Такой тариф уже существует и он активен";
+                        return View(tp);
+                    }
+                    else if (old.Status != "Active")
+                    {
 
-                    tariffonplace oldforchange = mp.tariffonplace.Where(x => x.SupportClimateControl== tp.SupportClimateControl & x.Type==x.Type & x.Status == "Active").FirstOrDefault();
+                        tariffonplace oldforchange = mp.tariffonplace.Where(x => x.SupportClimateControl == tp.SupportClimateControl & x.Type == x.Type & x.Status == "Active").FirstOrDefault();
+                        if (tp.Status == "Active")
+                        {
+                            if (oldforchange != null)
+                            {
+                                oldforchange.Status = "Not active";
+                                mp.Entry(oldforchange).State = EntityState.Modified;
+                                mp.SaveChanges();
+                            }
+                        }
+
+                        old.Status = tp.Status;
+                        mp.Entry(old).State = EntityState.Modified;
+                        mp.SaveChanges();
+                    }
+                }
+                else
+                {
+                    tariffonplace oldforchange = mp.tariffonplace.Where(x => x.SupportClimateControl == tp.SupportClimateControl & x.Type == tp.Type & x.Status == "Active").FirstOrDefault();
                     if (tp.Status == "Active")
                     {
                         if (oldforchange != null)
@@ -511,34 +542,17 @@ namespace ParkgMVC.Controllers
                         }
                     }
 
-                    old.Status = tp.Status;
-                    mp.Entry(old).State = EntityState.Modified;
+                    tariffonplace tpnew = new tariffonplace();
+                    tpnew.Status = tp.Status;
+                    tpnew.SupportClimateControl = oldforchange.SupportClimateControl;
+                    tpnew.Type = oldforchange.Type;
+                    tpnew.PriceForHourWithAbonement = tp.PriceForHourWithAbonement;
+                    tpnew.PriceForHourWithoutAbonement = tp.PriceForHourWithoutAbonement;
+                    mp.tariffonplace.Add(tpnew);
                     mp.SaveChanges();
                 }
             }
-            else
-            {
-                tariffonplace oldforchange = mp.tariffonplace.Where(x => x.SupportClimateControl == tp.SupportClimateControl & x.Type == tp.Type & x.Status == "Active").FirstOrDefault();
-                if (tp.Status == "Active")
-                {
-                    if (oldforchange != null)
-                    {
-                        oldforchange.Status = "Not active";
-                        mp.Entry(oldforchange).State = EntityState.Modified;
-                        mp.SaveChanges();
-                    }
-                }
-
-                tariffonplace tpnew = new tariffonplace();
-                tpnew.Status = tp.Status;
-                tpnew.SupportClimateControl = oldforchange.SupportClimateControl;
-                tpnew.Type = oldforchange.Type;
-                tpnew.PriceForHourWithAbonement = tp.PriceForHourWithAbonement;
-                tpnew.PriceForHourWithoutAbonement = tp.PriceForHourWithoutAbonement;
-                mp.tariffonplace.Add(tpnew);
-                mp.SaveChanges();
-            }
-
+            else return View();
             return RedirectToAction("TariffsOnPlace");
         }
 
@@ -550,51 +564,55 @@ namespace ParkgMVC.Controllers
         {
             if (id_tariff_on_place != null)
             {
-                tariffonplace oldforchange = mp.tariffonplace.Where(x => x.id_tariff_on_place == id_tariff_on_place).FirstOrDefault();
-                if (oldforchange != null)
+                if (ModelState.IsValid)
                 {
-                    tariffonplace old = mp.tariffonplace.Where(x => x.id_tariff_on_place == id_tariff_on_place & x.PriceForHourWithAbonement == tp.PriceForHourWithAbonement & x.PriceForHourWithoutAbonement == tp.PriceForHourWithoutAbonement).FirstOrDefault();
-                    if (old != null)
+                    tariffonplace oldforchange = mp.tariffonplace.Where(x => x.id_tariff_on_place == id_tariff_on_place).FirstOrDefault();
+                    if (oldforchange != null)
                     {
-                        ViewData["VisitParameters"] = "Изменений не произошло!";
-                        return View(old);
-                    }
-                    else
-                    {
-                        if (oldforchange.Status != "Active")
+                        tariffonplace old = mp.tariffonplace.Where(x => x.id_tariff_on_place == id_tariff_on_place & x.PriceForHourWithAbonement == tp.PriceForHourWithAbonement & x.PriceForHourWithoutAbonement == tp.PriceForHourWithoutAbonement).FirstOrDefault();
+                        if (old != null)
                         {
-                            ViewData["VisitParameters"] = "Этот тариф больше неактивен, применить к нему измененения невозможно!";
+                            ViewData["VisitParameters"] = "Изменений не произошло!";
                             return View(old);
                         }
                         else
                         {
-                            //произвожу изменение статуса тарифа на not active в oldforchange
-                            tariffonplace old2 = mp.tariffonplace.Where(x =>x.SupportClimateControl == oldforchange.SupportClimateControl & x.Type==oldforchange.Type & x.Status!="Active" & x.PriceForHourWithAbonement == tp.PriceForHourWithAbonement & x.PriceForHourWithoutAbonement == tp.PriceForHourWithoutAbonement).FirstOrDefault();
-             
-                            oldforchange.Status = "Not active";
-                            mp.Entry(oldforchange).State = EntityState.Modified;
-                            mp.SaveChanges();
-                            if (old2 != null)
+                            if (oldforchange.Status != "Active")
                             {
-                                    old2.Status = "Active";
-                                    mp.Entry(old2).State = EntityState.Modified;
-                                    mp.SaveChanges();
-                                
+                                ViewData["VisitParameters"] = "Этот тариф больше неактивен, применить к нему измененения невозможно!";
+                                return View(old);
                             }
                             else
                             {
-                                tariffonplace tpnew = new tariffonplace();
-                                tpnew.Status = "Active";
-                                tpnew.SupportClimateControl = oldforchange.SupportClimateControl;
-                                tpnew.Type = oldforchange.Type;
-                                tpnew.PriceForHourWithAbonement = tp.PriceForHourWithAbonement;
-                                tpnew.PriceForHourWithoutAbonement = tp.PriceForHourWithoutAbonement;
-                                mp.tariffonplace.Add(tpnew);
+                                //произвожу изменение статуса тарифа на not active в oldforchange
+                                tariffonplace old2 = mp.tariffonplace.Where(x => x.SupportClimateControl == oldforchange.SupportClimateControl & x.Type == oldforchange.Type & x.Status != "Active" & x.PriceForHourWithAbonement == tp.PriceForHourWithAbonement & x.PriceForHourWithoutAbonement == tp.PriceForHourWithoutAbonement).FirstOrDefault();
+
+                                oldforchange.Status = "Not active";
+                                mp.Entry(oldforchange).State = EntityState.Modified;
                                 mp.SaveChanges();
+                                if (old2 != null)
+                                {
+                                    old2.Status = "Active";
+                                    mp.Entry(old2).State = EntityState.Modified;
+                                    mp.SaveChanges();
+
+                                }
+                                else
+                                {
+                                    tariffonplace tpnew = new tariffonplace();
+                                    tpnew.Status = "Active";
+                                    tpnew.SupportClimateControl = oldforchange.SupportClimateControl;
+                                    tpnew.Type = oldforchange.Type;
+                                    tpnew.PriceForHourWithAbonement = tp.PriceForHourWithAbonement;
+                                    tpnew.PriceForHourWithoutAbonement = tp.PriceForHourWithoutAbonement;
+                                    mp.tariffonplace.Add(tpnew);
+                                    mp.SaveChanges();
+                                }
                             }
                         }
                     }
                 }
+                else return View();
             }
             return RedirectToAction("TariffsOnPlace");
         }
@@ -698,75 +716,19 @@ namespace ParkgMVC.Controllers
         [MultiButton(MatchFormKey = "Create_abonement", MatchFormValue = "Save_abonement")]
         public ActionResult Save_abonement(tariffonabonementforvisit ab)
         {
-
-            tariffonabonementforvisit oldforchange = mp.tariffonabonementforvisit.Where(x => x.Name_tariff_on_abonement == ab.Name_tariff_on_abonement).FirstOrDefault();
-
-
-            if (oldforchange == null)
+            if (ModelState.IsValid)
             {
+                tariffonabonementforvisit oldforchange = mp.tariffonabonementforvisit.Where(x => x.Name_tariff_on_abonement == ab.Name_tariff_on_abonement).FirstOrDefault();
 
-                tariffonabonementforvisit old2 = mp.tariffonabonementforvisit.Where(x => (x.Max_Num_visits_in_this_tariff == ab.Max_Num_visits_in_this_tariff || x.Num_days == ab.Num_days) & x.Price == ab.Price).FirstOrDefault();
-                if (old2 == null)
+
+                if (oldforchange == null)
                 {
-                    tariffonabonementforvisit abnew = new tariffonabonementforvisit();
-                    abnew.Status = ab.Status;
-                    abnew.Max_Num_visits_in_this_tariff = ab.Max_Num_visits_in_this_tariff;
-                    abnew.Name_tariff_on_abonement = ab.Name_tariff_on_abonement;
-                    abnew.Num_days = ab.Num_days;
-                    abnew.Price = ab.Price;
 
-                    mp.tariffonabonementforvisit.Add(abnew);
-                    mp.SaveChanges();
-                }
-                else if (old2 != null)
-                {
-                    if (old2.Status != "Available" & ab.Status == "Available")
-                    {
-                        old2.Status = "Available";
-                        mp.Entry(old2).State = EntityState.Modified;
-                        mp.SaveChanges();
-                    }
-                }
-
-            }
-
-
-
-
-
-            return RedirectToAction("TariffsOnAbonements");
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        [MultiButton(MatchFormKey = "Change_abonement", MatchFormValue = "Save_change_abonement")]
-        public ActionResult Change_visit_parameters(tariffonabonementforvisit ab, string Name)
-        {//string name
-            tariffonabonementforvisit oldforchang = mp.tariffonabonementforvisit.Where(x => x.Name_tariff_on_abonement == Name).FirstOrDefault();
-            if (oldforchang != null)
-            {
-                oldforchang.Status = "Not available";
-                mp.Entry(oldforchang).State = EntityState.Modified;
-                mp.SaveChanges();
-                tariffonabonementforvisit old2 = mp.tariffonabonementforvisit.Where(x => (x.Max_Num_visits_in_this_tariff == ab.Max_Num_visits_in_this_tariff || x.Num_days == ab.Num_days) & x.Price == ab.Price).FirstOrDefault();
-                if (old2 != null)
-                {
-                    if (old2.Status != "Available")
-                    {
-                        old2.Status = "Available";
-                        mp.Entry(old2).State = EntityState.Modified;
-                        mp.SaveChanges();
-                    }
-                }
-                else
-                {
-                    tariffonabonementforvisit oldforchange = mp.tariffonabonementforvisit.Where(x => x.Name_tariff_on_abonement == ab.Name_tariff_on_abonement).FirstOrDefault();
-
-
-
-                    if (oldforchange == null)
+                    tariffonabonementforvisit old2 = mp.tariffonabonementforvisit.Where(x => (x.Max_Num_visits_in_this_tariff == ab.Max_Num_visits_in_this_tariff || x.Num_days == ab.Num_days) & x.Price == ab.Price).FirstOrDefault();
+                    if (old2 == null)
                     {
                         tariffonabonementforvisit abnew = new tariffonabonementforvisit();
-                        abnew.Status = "Available";
+                        abnew.Status = ab.Status;
                         abnew.Max_Num_visits_in_this_tariff = ab.Max_Num_visits_in_this_tariff;
                         abnew.Name_tariff_on_abonement = ab.Name_tariff_on_abonement;
                         abnew.Num_days = ab.Num_days;
@@ -775,13 +737,78 @@ namespace ParkgMVC.Controllers
                         mp.tariffonabonementforvisit.Add(abnew);
                         mp.SaveChanges();
                     }
+                    else if (old2 != null)
+                    {
+                        if (old2.Status != "Available" & ab.Status == "Available")
+                        {
+                            old2.Status = "Available";
+                            mp.Entry(old2).State = EntityState.Modified;
+                            mp.SaveChanges();
+                        }
+                    }
+
                 }
 
 
             }
+            else return View();
+
+
+            return RedirectToAction("TariffsOnAbonements");
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        [MultiButton(MatchFormKey = "Change_abonement", MatchFormValue = "Save_change_abonement")]
+        public ActionResult Change_abonement(tariffonabonementforvisit ab, string Name)
+        {//string name
+            if (ModelState.IsValid)
+            {
+                if (Name != null)
+                {
+                    tariffonabonementforvisit oldforchang = mp.tariffonabonementforvisit.Where(x => x.Name_tariff_on_abonement == Name).FirstOrDefault();
+                    if (oldforchang != null)
+                    {
+                        oldforchang.Status = "Not available";
+                        mp.Entry(oldforchang).State = EntityState.Modified;
+                        mp.SaveChanges();
+                        tariffonabonementforvisit old2 = mp.tariffonabonementforvisit.Where(x => (x.Max_Num_visits_in_this_tariff == ab.Max_Num_visits_in_this_tariff || x.Num_days == ab.Num_days) & x.Price == ab.Price).FirstOrDefault();
+                        if (old2 != null)
+                        {
+                            if (old2.Status != "Available")
+                            {
+                                old2.Status = "Available";
+                                mp.Entry(old2).State = EntityState.Modified;
+                                mp.SaveChanges();
+                            }
+                        }
+                        else
+                        {
+                            tariffonabonementforvisit oldforchange = mp.tariffonabonementforvisit.Where(x => x.Name_tariff_on_abonement == ab.Name_tariff_on_abonement).FirstOrDefault();
 
 
 
+                            if (oldforchange == null)
+                            {
+                                tariffonabonementforvisit abnew = new tariffonabonementforvisit();
+                                abnew.Status = "Available";
+                                abnew.Max_Num_visits_in_this_tariff = ab.Max_Num_visits_in_this_tariff;
+                                abnew.Name_tariff_on_abonement = ab.Name_tariff_on_abonement;
+                                abnew.Num_days = ab.Num_days;
+                                abnew.Price = ab.Price;
+
+                                mp.tariffonabonementforvisit.Add(abnew);
+                                mp.SaveChanges();
+                            }
+                        }
+
+
+                    }
+                }
+            }
+            else return View();
+
+
+        
             return RedirectToAction("TariffsOnAbonements");
         }
 

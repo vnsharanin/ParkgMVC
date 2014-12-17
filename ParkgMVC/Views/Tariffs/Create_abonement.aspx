@@ -48,7 +48,7 @@
             
             <div class="editor-label">
                 <%: Html.LabelFor(model => model.Status) %>
-            </div>
+            </div>(Available, Not available)
             <div class="editor-field">
                 <%: Html.TextBoxFor(model => model.Status) %>
                 <%: Html.ValidationMessageFor(model => model.Status) %>

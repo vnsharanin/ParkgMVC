@@ -408,9 +408,16 @@ namespace ParkgMVC.Controllers
 
         protected bool ViewDataSelectList(string Name)
         {
-            var Type_Zone = mp.type_parking.ToList();
-            ViewData["Type_zone"] = new SelectList(Type_Zone, "Name", "Name",Name);
-            return Type_Zone.Count() > 0;
+            try
+            {
+                var Type_Zone = mp.type_parking.ToList();
+                ViewData["Type_zone"] = new SelectList(Type_Zone, "Name", "Name", Name);
+                return Type_Zone.Count() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

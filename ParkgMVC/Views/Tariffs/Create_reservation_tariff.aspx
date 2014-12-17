@@ -40,7 +40,7 @@
             
             <div class="editor-label">
                 <%: Html.LabelFor(model => model.Status) %>
-            </div>
+            </div>(available (именно с маленькой буквы), Not available)
             <div class="editor-field">
                 <%: Html.TextBoxFor(model => model.Status) %>
                 <%: Html.ValidationMessageFor(model => model.Status) %>
